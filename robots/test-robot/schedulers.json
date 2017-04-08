@@ -1,0 +1,38 @@
+[
+	{
+		"N": 1000,
+		"C": 10,
+		"QPS": 1000,
+		"Name": "Connect",
+		"Display": false,
+		"PrintReport": false,
+		"W": null
+	},
+	{
+		"N": 1000,
+		"C": 10,
+		"QPS": 1000,
+		"Name": "Prepare",
+		"Display": false,
+		"PrintReport": false,
+		"W": null
+	},
+	{
+		"N": 100000,
+		"C": 100,
+		"QPS": 5000,
+		"Name": "Publish",
+		"Display": true,
+		"PrintReport": true,
+		"W": null
+	},
+	{
+		"N": 1000,
+		"C": 10,
+		"QPS": 1000,
+		"Name": "Disconnect",
+		"Display": false,
+		"PrintReport": false,
+		"W": null
+	}
+]
