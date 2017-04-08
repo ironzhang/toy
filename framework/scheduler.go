@@ -38,7 +38,9 @@ func (s *Scheduler) writer() io.Writer {
 }
 
 func (s *Scheduler) Run(ctx context.Context, robots []Robot) {
-	resultc := make(chan result, s.N)
+	n := len(robots)
+	N := n * s.N
+	resultc := make(chan result, N)
 	robotc := make(chan Robot, s.C)
 
 	if s.Display {
@@ -62,10 +64,9 @@ func (s *Scheduler) Run(ctx context.Context, robots []Robot) {
 		throttle = t.C
 	}
 
-	n := len(robots)
 	start := time.Now()
 L:
-	for i := 0; i < s.N; i++ {
+	for i := 0; i < N; i++ {
 		select {
 		case <-ctx.Done():
 			break L
@@ -85,7 +86,7 @@ L:
 	close(resultc)
 
 	if s.PrintReport {
-		makeReport(s.Name, s.N, s.QPS, time.Since(start), resultc).print(s.writer())
+		makeReport(s.Name, N, s.QPS, time.Since(start), resultc).print(s.writer())
 	}
 }
 

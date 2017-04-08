@@ -42,7 +42,7 @@ func TestWork(t *testing.T) {
 		Robots: robots,
 		Schedulers: []Scheduler{
 			{
-				N:           n,
+				N:           1,
 				C:           10,
 				QPS:         1000,
 				Name:        "Connect",
@@ -50,7 +50,7 @@ func TestWork(t *testing.T) {
 				PrintReport: false,
 			},
 			{
-				N:           n,
+				N:           1,
 				C:           10,
 				QPS:         1000,
 				Name:        "Prepare",
@@ -58,7 +58,7 @@ func TestWork(t *testing.T) {
 				PrintReport: false,
 			},
 			{
-				N:           n * 100,
+				N:           100,
 				C:           100,
 				QPS:         5000,
 				Name:        "Publish",
@@ -66,7 +66,7 @@ func TestWork(t *testing.T) {
 				PrintReport: true,
 			},
 			{
-				N:           n,
+				N:           1,
 				C:           10,
 				QPS:         1000,
 				Name:        "Disconnect",
