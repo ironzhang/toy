@@ -40,7 +40,7 @@ func TestSchedulerN(t *testing.T) {
 	}
 }
 
-func TestSchedulerQPS(t *testing.T) {
+func TestSchedulerQPS1(t *testing.T) {
 	r := &SchedulerRobot{ok: true}
 	robots := []Robot{r}
 
@@ -62,6 +62,25 @@ func TestSchedulerQPS(t *testing.T) {
 		QPS: 1,
 	}
 	e.Run(context.Background(), robots)
+}
+
+func TestSchedulerQPS2(t *testing.T) {
+	r := &SchedulerRobot{ok: true}
+	robots := []Robot{r}
+
+	(&Scheduler{
+		N:           10000,
+		C:           1,
+		QPS:         0,
+		PrintReport: true,
+	}).Run(context.Background(), robots)
+
+	(&Scheduler{
+		N:           10000,
+		C:           1,
+		QPS:         1000000,
+		PrintReport: true,
+	}).Run(context.Background(), robots)
 }
 
 func TestSchedulerDisplay(t *testing.T) {

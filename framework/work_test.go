@@ -2,6 +2,7 @@ package framework
 
 import (
 	"context"
+	"io/ioutil"
 	"sync/atomic"
 	"testing"
 )
@@ -64,6 +65,7 @@ func TestWork(t *testing.T) {
 				Name:        "Publish",
 				Display:     true,
 				PrintReport: true,
+				W:           ioutil.Discard,
 			},
 			{
 				N:           1,

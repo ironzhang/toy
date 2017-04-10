@@ -27,7 +27,8 @@ type Scheduler struct {
 
 	Display     bool
 	PrintReport bool
-	W           io.Writer
+
+	W io.Writer `json:"-"`
 }
 
 func (s *Scheduler) writer() io.Writer {
@@ -58,8 +59,9 @@ func (s *Scheduler) Run(ctx context.Context, robots []Robot) {
 	}
 
 	var throttle <-chan time.Time
-	if s.QPS > 0 {
-		t := time.NewTicker(time.Second / time.Duration(s.QPS))
+	d, cycle := s.throttleCycle()
+	if cycle > 0 {
+		t := time.NewTicker(d)
 		defer t.Stop()
 		throttle = t.C
 	}
@@ -73,7 +75,7 @@ L:
 		default:
 			r := robots[i%n]
 			if r.OK() {
-				if s.QPS > 0 {
+				if cycle > 0 && i%cycle == 0 {
 					<-throttle
 				}
 				robotc <- r
@@ -90,7 +92,42 @@ L:
 	}
 }
 
-func runWorker(name string, robotc chan Robot, resultc chan<- result) {
+func (s *Scheduler) throttleCycle() (d time.Duration, c int) {
+	if s.QPS <= 0 {
+		return
+	}
+
+	c = 1
+	d = time.Second / time.Duration(s.QPS)
+	for d < time.Millisecond {
+		c *= 10
+		d *= 10
+	}
+	return
+}
+
+func (s *Scheduler) runWorkers(robotc <-chan Robot) (resultc chan<- result) {
+	resultc = make(chan result, s.C)
+
+	var wg sync.WaitGroup
+	wg.Add(s.C)
+
+	for i := 0; i < s.C; i++ {
+		go func() {
+			runWorker(s.Name, robotc, resultc)
+			wg.Done()
+		}()
+	}
+
+	go func() {
+		wg.Wait()
+		close(resultc)
+	}()
+
+	return resultc
+}
+
+func runWorker(name string, robotc <-chan Robot, resultc chan<- result) {
 	for r := range robotc {
 		resultc <- call(name, r)
 	}
