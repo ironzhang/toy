@@ -8,26 +8,25 @@ import (
 )
 
 func TestWriteSchedulersJSON(t *testing.T) {
-	n := 1000
 	schedulers := []framework.Scheduler{
 		{
-			N:           n,
+			N:           1,
 			C:           10,
 			QPS:         1000,
 			Name:        "Connect",
-			Display:     false,
+			Display:     true,
 			PrintReport: false,
 		},
 		{
-			N:           n,
+			N:           1,
 			C:           10,
 			QPS:         1000,
 			Name:        "Prepare",
-			Display:     false,
+			Display:     true,
 			PrintReport: false,
 		},
 		{
-			N:           n * 100,
+			N:           100,
 			C:           100,
 			QPS:         5000,
 			Name:        "Publish",
@@ -35,11 +34,11 @@ func TestWriteSchedulersJSON(t *testing.T) {
 			PrintReport: true,
 		},
 		{
-			N:           n,
+			N:           1,
 			C:           10,
 			QPS:         1000,
 			Name:        "Disconnect",
-			Display:     false,
+			Display:     true,
 			PrintReport: false,
 		},
 	}
