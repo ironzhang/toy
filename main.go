@@ -21,39 +21,38 @@ const (
 func main() {
 	var robotNum int
 	var robotPath string
-
 	flag.IntVar(&robotNum, "robot-num", 1, "run robot number")
 	flag.StringVar(&robotPath, "robot-path", "./robots/test-robot", "robot plugin path")
 	flag.Parse()
 
 	p, err := plugin.Open(fmt.Sprintf("%s/%s", robotPath, ROBOT_SO))
 	if err != nil {
-		fmt.Printf("plugin open: %v", err)
+		fmt.Printf("plugin open: %v\n", err)
 		return
 	}
 
 	s, err := p.Lookup("NewRobots")
 	if err != nil {
-		fmt.Printf("plugin lookup: %v", err)
+		fmt.Printf("plugin lookup: %v\n", err)
 		return
 	}
 
 	NewRobots, ok := s.(func(int, string) ([]framework.Robot, error))
 	if !ok {
-		fmt.Printf("%T is unexpect", s)
+		fmt.Printf("%T is unexpect\n", s)
 		return
 	}
 
 	robots, err := NewRobots(robotNum, fmt.Sprintf("%s/%s", robotPath, ROBOT_JSON))
 	if err != nil {
-		fmt.Printf("new robots: %v", err)
+		fmt.Printf("new robots: %v\n", err)
 		return
 	}
 
 	var schedulers []framework.Scheduler
 	err = jsoncfg.LoadFromFile(fmt.Sprintf("%s/%s", robotPath, SCHEDULERS_JSON), &schedulers)
 	if err != nil {
-		fmt.Printf("load schedulers json from file: %v", err)
+		fmt.Printf("load schedulers json from file: %v\n", err)
 		return
 	}
 
