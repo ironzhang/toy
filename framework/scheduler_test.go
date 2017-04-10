@@ -73,6 +73,7 @@ func TestSchedulerQPS2(t *testing.T) {
 		C:           1,
 		QPS:         0,
 		PrintReport: true,
+		W:           ioutil.Discard,
 	}).Run(context.Background(), robots)
 
 	(&Scheduler{
@@ -80,6 +81,7 @@ func TestSchedulerQPS2(t *testing.T) {
 		C:           1,
 		QPS:         1000000,
 		PrintReport: true,
+		W:           ioutil.Discard,
 	}).Run(context.Background(), robots)
 }
 
@@ -88,7 +90,7 @@ func TestSchedulerDisplay(t *testing.T) {
 	robots := []Robot{r1}
 
 	e := Scheduler{
-		N:           100,
+		N:           -1,
 		C:           2,
 		QPS:         10,
 		Name:        "TestSchedulerDisplay",
@@ -96,7 +98,7 @@ func TestSchedulerDisplay(t *testing.T) {
 		PrintReport: true,
 		W:           ioutil.Discard,
 	}
-	ctx, _ := context.WithDeadline(context.Background(), time.Now().Add(4*time.Second))
+	ctx, _ := context.WithDeadline(context.Background(), time.Now().Add(4*time.Second+300*time.Millisecond))
 	e.Run(ctx, robots)
 }
 

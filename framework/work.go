@@ -9,7 +9,7 @@ type Work struct {
 
 func (w *Work) Run(ctx context.Context) {
 	for _, s := range w.Schedulers {
-		if s.N > 0 {
+		if s.N != 0 {
 			s.Run(ctx, w.Robots)
 		}
 	}

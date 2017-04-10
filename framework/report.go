@@ -18,11 +18,11 @@ type report struct {
 	errs    map[string]int
 }
 
-func makeReport(name string, request, qps int, total time.Duration, resultc chan result) *report {
+func makeReport(name string, request, qps int, total time.Duration, results []result) *report {
 	var sum time.Duration
 	errs := make(map[string]int)
-	lats := make([]time.Duration, 0, len(resultc))
-	for res := range resultc {
+	lats := make([]time.Duration, 0, len(results))
+	for _, res := range results {
 		if res.err != nil {
 			errs[res.err.Error()]++
 		} else {

@@ -25,6 +25,7 @@ type Scheduler struct {
 	QPS  int
 	Name string
 
+	Sample      int
 	Display     bool
 	PrintReport bool
 
@@ -38,26 +39,63 @@ func (s *Scheduler) writer() io.Writer {
 	return s.W
 }
 
+func (s *Scheduler) infinite() bool {
+	return s.N < 0
+}
+
 func (s *Scheduler) Run(ctx context.Context, robots []Robot) {
-	n := len(robots)
-	N := n * s.N
-	resultc := make(chan result, N)
-	robotc := make(chan Robot, s.C)
+	start := time.Now()
+	resultc := s.runWorkers(s.runTasks(ctx, robots))
 
-	if s.Display {
-		go display(ctx, s.writer(), s.Name, resultc)
+	var nres int
+	var request int
+	if s.infinite() {
+		nres = s.Sample * len(robots)
+		request = -1
+	} else {
+		nres = s.N * len(robots)
+		request = nres
 	}
 
-	var wg sync.WaitGroup
-	wg.Add(s.C)
+	done := 0
+	prev := start
+	results := make([]result, 0, nres)
+	for res := range resultc {
+		done++
+		if s.Display && time.Since(prev) >= 500*time.Millisecond {
+			fmt.Fprintf(s.writer(), "%s: %d requests done.\n", s.Name, done)
+			prev = time.Now()
+		}
 
-	for i := 0; i < s.C; i++ {
-		go func() {
-			runWorker(s.Name, robotc, resultc)
-			wg.Done()
-		}()
+		results = append(results, res)
+		if len(results) >= nres {
+			if s.PrintReport {
+				makeReport(s.Name, request, s.QPS, time.Since(start), results).print(s.writer())
+			}
+			start = time.Now()
+			results = results[:0]
+		}
 	}
 
+	if s.PrintReport && len(results) > 0 {
+		makeReport(s.Name, request, s.QPS, time.Since(start), results).print(s.writer())
+	}
+}
+
+func (s *Scheduler) throttleCycle() (d time.Duration, c int) {
+	if s.QPS <= 0 {
+		return
+	}
+	c = 1
+	d = time.Second / time.Duration(s.QPS)
+	for d < time.Millisecond {
+		c *= 10
+		d *= 10
+	}
+	return
+}
+
+func (s *Scheduler) dispatchTasks(ctx context.Context, robots []Robot, robotc chan<- Robot) {
 	var throttle <-chan time.Time
 	d, cycle := s.throttleCycle()
 	if cycle > 0 {
@@ -66,12 +104,12 @@ func (s *Scheduler) Run(ctx context.Context, robots []Robot) {
 		throttle = t.C
 	}
 
-	start := time.Now()
-L:
-	for i := 0; i < N; i++ {
+	n := len(robots)
+	N := n * s.N
+	for i := 0; i < N || s.infinite(); i++ {
 		select {
 		case <-ctx.Done():
-			break L
+			return
 		default:
 			r := robots[i%n]
 			if r.OK() {
@@ -82,32 +120,19 @@ L:
 			}
 		}
 	}
-
-	close(robotc)
-	wg.Wait()
-	close(resultc)
-
-	if s.PrintReport {
-		makeReport(s.Name, N, s.QPS, time.Since(start), resultc).print(s.writer())
-	}
 }
 
-func (s *Scheduler) throttleCycle() (d time.Duration, c int) {
-	if s.QPS <= 0 {
-		return
-	}
-
-	c = 1
-	d = time.Second / time.Duration(s.QPS)
-	for d < time.Millisecond {
-		c *= 10
-		d *= 10
-	}
-	return
+func (s *Scheduler) runTasks(ctx context.Context, robots []Robot) <-chan Robot {
+	robotc := make(chan Robot, s.C)
+	go func() {
+		s.dispatchTasks(ctx, robots, robotc)
+		close(robotc)
+	}()
+	return robotc
 }
 
-func (s *Scheduler) runWorkers(robotc <-chan Robot) (resultc chan<- result) {
-	resultc = make(chan result, s.C)
+func (s *Scheduler) runWorkers(robotc <-chan Robot) <-chan result {
+	resultc := make(chan result, s.C)
 
 	var wg sync.WaitGroup
 	wg.Add(s.C)
@@ -138,23 +163,4 @@ func call(name string, r Robot) result {
 	e := r.Do(name)
 	d := time.Since(s)
 	return result{err: e, duration: d}
-}
-
-func display(ctx context.Context, w io.Writer, name string, resultc chan result) {
-	t := time.NewTicker(500 * time.Millisecond)
-	defer t.Stop()
-
-	var prev int
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case <-t.C:
-			n := len(resultc)
-			if prev < n {
-				prev = n
-				fmt.Fprintf(w, "%s: %d requests done.\n", name, n)
-			}
-		}
-	}
 }

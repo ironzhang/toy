@@ -28,12 +28,11 @@ func TestMakeReport(t *testing.T) {
 
 	for _, test := range tests {
 		var sum time.Duration
-		results := make(chan result, len(test.durations))
+		results := make([]result, 0, len(test.durations))
 		for _, d := range test.durations {
 			sum += d
-			results <- result{duration: d}
+			results = append(results, result{duration: d})
 		}
-		close(results)
 
 		r := makeReport(test.name, test.request, test.qps, test.total, results)
 		if r.name != test.name {
