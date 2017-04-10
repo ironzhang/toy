@@ -45,7 +45,7 @@ func (s *Scheduler) infinite() bool {
 
 func (s *Scheduler) Run(ctx context.Context, robots []Robot) {
 	start := time.Now()
-	resultc := s.runWorkers(s.runTasks(ctx, robots))
+	resultc := s.runWorkers(s.produceTasks(ctx, robots))
 
 	var nres int
 	var request int
@@ -63,8 +63,8 @@ func (s *Scheduler) Run(ctx context.Context, robots []Robot) {
 	for res := range resultc {
 		done++
 		if s.Display && time.Since(prev) >= 500*time.Millisecond {
-			fmt.Fprintf(s.writer(), "%s: %d requests done.\n", s.Name, done)
 			prev = time.Now()
+			fmt.Fprintf(s.writer(), "%s: %d requests done.\n", s.Name, done)
 		}
 
 		results = append(results, res)
@@ -122,7 +122,7 @@ func (s *Scheduler) dispatchTasks(ctx context.Context, robots []Robot, robotc ch
 	}
 }
 
-func (s *Scheduler) runTasks(ctx context.Context, robots []Robot) <-chan Robot {
+func (s *Scheduler) produceTasks(ctx context.Context, robots []Robot) <-chan Robot {
 	robotc := make(chan Robot, s.C)
 	go func() {
 		s.dispatchTasks(ctx, robots, robotc)
