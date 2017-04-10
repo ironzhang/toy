@@ -2,16 +2,31 @@ package main
 
 import (
 	"context"
-	"encoding/json"
+	"flag"
 	"fmt"
-	"io/ioutil"
+	"os"
+	"os/signal"
 	"plugin"
 
+	"github.com/ironzhang/golang/jsoncfg"
 	"github.com/ironzhang/toy/framework"
 )
 
+const (
+	ROBOT_SO        = "robot.so"
+	ROBOT_JSON      = "robot.json"
+	SCHEDULERS_JSON = "schedulers.json"
+)
+
 func main() {
-	p, err := plugin.Open("./robots/test-robot/robot.so")
+	var robotNum int
+	var robotPath string
+
+	flag.IntVar(&robotNum, "robot-num", 1, "run robot number")
+	flag.StringVar(&robotPath, "robot-path", "./robots/test-robot", "robot plugin path")
+	flag.Parse()
+
+	p, err := plugin.Open(fmt.Sprintf("%s/%s", robotPath, ROBOT_SO))
 	if err != nil {
 		fmt.Printf("plugin open: %v", err)
 		return
@@ -29,25 +44,25 @@ func main() {
 		return
 	}
 
-	robots, err := NewRobots(100, "./robots/test-robot/robot.json")
+	robots, err := NewRobots(robotNum, fmt.Sprintf("%s/%s", robotPath, ROBOT_JSON))
 	if err != nil {
 		fmt.Printf("new robots: %v", err)
 		return
 	}
 
 	var schedulers []framework.Scheduler
-	data, err := ioutil.ReadFile("./robots/test-robot/schedulers.json")
+	err = jsoncfg.LoadFromFile(fmt.Sprintf("%s/%s", robotPath, SCHEDULERS_JSON), &schedulers)
 	if err != nil {
-		fmt.Printf("read file: %v", err)
-		return
-	}
-	if err = json.Unmarshal(data, &schedulers); err != nil {
-		fmt.Printf("json unmarshal: %v", err)
+		fmt.Printf("load schedulers json from file: %v", err)
 		return
 	}
 
-	(&framework.Work{
-		Robots:     robots,
-		Schedulers: schedulers,
-	}).Run(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, os.Interrupt)
+		<-c
+		defer cancel()
+	}()
+	(&framework.Work{Robots: robots, Schedulers: schedulers}).Run(ctx)
 }

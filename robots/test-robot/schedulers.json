@@ -4,6 +4,7 @@
 		"C": 10,
 		"QPS": 1000,
 		"Name": "Connect",
+		"Sample": 0,
 		"Display": true,
 		"PrintReport": false
 	},
@@ -12,6 +13,7 @@
 		"C": 10,
 		"QPS": 1000,
 		"Name": "Prepare",
+		"Sample": 0,
 		"Display": true,
 		"PrintReport": false
 	},
@@ -20,6 +22,7 @@
 		"C": 100,
 		"QPS": 5000,
 		"Name": "Publish",
+		"Sample": 0,
 		"Display": true,
 		"PrintReport": true
 	},
@@ -28,6 +31,7 @@
 		"C": 10,
 		"QPS": 1000,
 		"Name": "Disconnect",
+		"Sample": 0,
 		"Display": true,
 		"PrintReport": false
 	}
