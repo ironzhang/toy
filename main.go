@@ -10,6 +10,7 @@ import (
 
 	"github.com/ironzhang/golang/jsoncfg"
 	"github.com/ironzhang/toy/framework"
+	"github.com/ironzhang/toy/framework/robot"
 )
 
 const (
@@ -37,7 +38,7 @@ func main() {
 		return
 	}
 
-	NewRobots, ok := s.(func(int, string) ([]framework.Robot, error))
+	NewRobots, ok := s.(func(int, string) ([]robot.Robot, error))
 	if !ok {
 		fmt.Printf("%T is unexpect\n", s)
 		return

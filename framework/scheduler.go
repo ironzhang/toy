@@ -7,16 +7,13 @@ import (
 	"os"
 	"sync"
 	"time"
+
+	"github.com/ironzhang/toy/framework/robot"
 )
 
 type result struct {
 	err      error
 	duration time.Duration
-}
-
-type Robot interface {
-	OK() bool
-	Do(name string) error
 }
 
 type Scheduler struct {
@@ -43,7 +40,7 @@ func (s *Scheduler) infinite() bool {
 	return s.N < 0
 }
 
-func (s *Scheduler) Run(ctx context.Context, robots []Robot) {
+func (s *Scheduler) Run(ctx context.Context, robots []robot.Robot) {
 	start := time.Now()
 	resultc := s.runWorkers(s.produceTasks(ctx, robots))
 
@@ -95,7 +92,7 @@ func (s *Scheduler) throttleCycle() (d time.Duration, c int) {
 	return
 }
 
-func (s *Scheduler) dispatchTasks(ctx context.Context, robots []Robot, robotc chan<- Robot) {
+func (s *Scheduler) dispatchTasks(ctx context.Context, robots []robot.Robot, robotc chan<- robot.Robot) {
 	var throttle <-chan time.Time
 	d, cycle := s.throttleCycle()
 	if cycle > 0 {
@@ -122,8 +119,8 @@ func (s *Scheduler) dispatchTasks(ctx context.Context, robots []Robot, robotc ch
 	}
 }
 
-func (s *Scheduler) produceTasks(ctx context.Context, robots []Robot) <-chan Robot {
-	robotc := make(chan Robot, s.C)
+func (s *Scheduler) produceTasks(ctx context.Context, robots []robot.Robot) <-chan robot.Robot {
+	robotc := make(chan robot.Robot, s.C)
 	go func() {
 		s.dispatchTasks(ctx, robots, robotc)
 		close(robotc)
@@ -131,7 +128,7 @@ func (s *Scheduler) produceTasks(ctx context.Context, robots []Robot) <-chan Rob
 	return robotc
 }
 
-func (s *Scheduler) runWorkers(robotc <-chan Robot) <-chan result {
+func (s *Scheduler) runWorkers(robotc <-chan robot.Robot) <-chan result {
 	resultc := make(chan result, s.C)
 
 	var wg sync.WaitGroup
@@ -152,13 +149,13 @@ func (s *Scheduler) runWorkers(robotc <-chan Robot) <-chan result {
 	return resultc
 }
 
-func runWorker(name string, robotc <-chan Robot, resultc chan<- result) {
+func runWorker(name string, robotc <-chan robot.Robot, resultc chan<- result) {
 	for r := range robotc {
 		resultc <- call(name, r)
 	}
 }
 
-func call(name string, r Robot) result {
+func call(name string, r robot.Robot) result {
 	s := time.Now()
 	e := r.Do(name)
 	d := time.Since(s)

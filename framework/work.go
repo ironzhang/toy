@@ -1,9 +1,13 @@
 package framework
 
-import "context"
+import (
+	"context"
+
+	"github.com/ironzhang/toy/framework/robot"
+)
 
 type Work struct {
-	Robots     []Robot
+	Robots     []robot.Robot
 	Schedulers []Scheduler
 }
 

@@ -6,6 +6,8 @@ import (
 	"sync/atomic"
 	"testing"
 	"time"
+
+	"github.com/ironzhang/toy/framework/robot"
 )
 
 type SchedulerRobot struct {
@@ -25,7 +27,7 @@ func (r *SchedulerRobot) Do(name string) error {
 func TestSchedulerN(t *testing.T) {
 	r1 := &SchedulerRobot{ok: true}
 	r2 := &SchedulerRobot{ok: true}
-	robots := []Robot{r1, r2}
+	robots := []robot.Robot{r1, r2}
 	e := Scheduler{
 		N: 1000,
 		C: 10,
@@ -42,7 +44,7 @@ func TestSchedulerN(t *testing.T) {
 
 func TestSchedulerQPS1(t *testing.T) {
 	r := &SchedulerRobot{ok: true}
-	robots := []Robot{r}
+	robots := []robot.Robot{r}
 
 	start := time.Now()
 	tick := time.Tick(time.Second)
@@ -66,7 +68,7 @@ func TestSchedulerQPS1(t *testing.T) {
 
 func TestSchedulerQPS2(t *testing.T) {
 	r := &SchedulerRobot{ok: true}
-	robots := []Robot{r}
+	robots := []robot.Robot{r}
 
 	(&Scheduler{
 		N:           10000,
@@ -87,7 +89,7 @@ func TestSchedulerQPS2(t *testing.T) {
 
 func TestSchedulerDisplay(t *testing.T) {
 	r1 := &SchedulerRobot{ok: true}
-	robots := []Robot{r1}
+	robots := []robot.Robot{r1}
 
 	e := Scheduler{
 		N:           -1,
@@ -105,7 +107,7 @@ func TestSchedulerDisplay(t *testing.T) {
 func TestSchedulerRobotOK(t *testing.T) {
 	r1 := &SchedulerRobot{ok: true}
 	r2 := &SchedulerRobot{ok: false}
-	robots := []Robot{r1, r2}
+	robots := []robot.Robot{r1, r2}
 
 	e := Scheduler{
 		N: 5,

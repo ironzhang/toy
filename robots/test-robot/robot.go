@@ -1,9 +1,9 @@
 package main
 
-import "github.com/ironzhang/toy/framework"
+import "github.com/ironzhang/toy/framework/robot"
 
-func NewRobots(n int, file string) ([]framework.Robot, error) {
-	robots := make([]framework.Robot, 0, n)
+func NewRobots(n int, file string) ([]robot.Robot, error) {
+	robots := make([]robot.Robot, 0, n)
 	for i := 0; i < n; i++ {
 		robots = append(robots, &Robot{})
 	}

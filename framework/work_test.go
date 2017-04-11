@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync/atomic"
 	"testing"
+
+	"github.com/ironzhang/toy/framework/robot"
 )
 
 type WorkRobot struct {
@@ -33,7 +35,7 @@ func (r *WorkRobot) Do(name string) error {
 
 func TestWork(t *testing.T) {
 	n := 100
-	robots := make([]Robot, 0, n)
+	robots := make([]robot.Robot, 0, n)
 	for i := 0; i < n; i++ {
 		robots = append(robots, &WorkRobot{})
 	}
