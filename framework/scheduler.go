@@ -16,6 +16,18 @@ type result struct {
 	duration time.Duration
 }
 
+type task struct {
+	name  string
+	robot robot.Robot
+}
+
+func (t *task) execute() result {
+	s := time.Now()
+	e := t.robot.Do(t.name)
+	d := time.Since(s)
+	return result{err: e, duration: d}
+}
+
 type Scheduler struct {
 	N    int
 	C    int
@@ -38,6 +50,55 @@ func (s *Scheduler) writer() io.Writer {
 
 func (s *Scheduler) infinite() bool {
 	return s.N < 0
+}
+
+func (s *Scheduler) throttleCycle() (d time.Duration, c int) {
+	if s.QPS <= 0 {
+		return
+	}
+	c = 1
+	d = time.Second / time.Duration(s.QPS)
+	for d < time.Millisecond {
+		c *= 10
+		d *= 10
+	}
+	return
+}
+
+func (s *Scheduler) dispatchTasks(ctx context.Context, robots []robot.Robot, taskc chan<- task) {
+	var throttle <-chan time.Time
+	d, cycle := s.throttleCycle()
+	if cycle > 0 {
+		t := time.NewTicker(d)
+		defer t.Stop()
+		throttle = t.C
+	}
+
+	n := len(robots)
+	N := n * s.N
+	for i := 0; i < N || s.infinite(); i++ {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			r := robots[i%n]
+			if r.OK() {
+				if cycle > 0 && i%cycle == 0 {
+					<-throttle
+				}
+				taskc <- task{name: s.Name, robot: r}
+			}
+		}
+	}
+}
+
+func (s *Scheduler) produceTasks(ctx context.Context, robots []robot.Robot) <-chan task {
+	taskc := make(chan task, s.C)
+	go func() {
+		s.dispatchTasks(ctx, robots, taskc)
+		close(taskc)
+	}()
+	return taskc
 }
 
 func (s *Scheduler) Run(ctx context.Context, robots []robot.Robot) {
@@ -79,56 +140,7 @@ func (s *Scheduler) Run(ctx context.Context, robots []robot.Robot) {
 	}
 }
 
-func (s *Scheduler) throttleCycle() (d time.Duration, c int) {
-	if s.QPS <= 0 {
-		return
-	}
-	c = 1
-	d = time.Second / time.Duration(s.QPS)
-	for d < time.Millisecond {
-		c *= 10
-		d *= 10
-	}
-	return
-}
-
-func (s *Scheduler) dispatchTasks(ctx context.Context, robots []robot.Robot, robotc chan<- robot.Robot) {
-	var throttle <-chan time.Time
-	d, cycle := s.throttleCycle()
-	if cycle > 0 {
-		t := time.NewTicker(d)
-		defer t.Stop()
-		throttle = t.C
-	}
-
-	n := len(robots)
-	N := n * s.N
-	for i := 0; i < N || s.infinite(); i++ {
-		select {
-		case <-ctx.Done():
-			return
-		default:
-			r := robots[i%n]
-			if r.OK() {
-				if cycle > 0 && i%cycle == 0 {
-					<-throttle
-				}
-				robotc <- r
-			}
-		}
-	}
-}
-
-func (s *Scheduler) produceTasks(ctx context.Context, robots []robot.Robot) <-chan robot.Robot {
-	robotc := make(chan robot.Robot, s.C)
-	go func() {
-		s.dispatchTasks(ctx, robots, robotc)
-		close(robotc)
-	}()
-	return robotc
-}
-
-func (s *Scheduler) runWorkers(robotc <-chan robot.Robot) <-chan result {
+func (s *Scheduler) runWorkers(taskc <-chan task) <-chan result {
 	resultc := make(chan result, s.C)
 
 	var wg sync.WaitGroup
@@ -136,7 +148,7 @@ func (s *Scheduler) runWorkers(robotc <-chan robot.Robot) <-chan result {
 
 	for i := 0; i < s.C; i++ {
 		go func() {
-			runWorker(s.Name, robotc, resultc)
+			runWorker(taskc, resultc)
 			wg.Done()
 		}()
 	}
@@ -149,15 +161,8 @@ func (s *Scheduler) runWorkers(robotc <-chan robot.Robot) <-chan result {
 	return resultc
 }
 
-func runWorker(name string, robotc <-chan robot.Robot, resultc chan<- result) {
-	for r := range robotc {
-		resultc <- call(name, r)
+func runWorker(taskc <-chan task, resultc chan<- result) {
+	for t := range taskc {
+		resultc <- t.execute()
 	}
-}
-
-func call(name string, r robot.Robot) result {
-	s := time.Now()
-	e := r.Do(name)
-	d := time.Since(s)
-	return result{err: e, duration: d}
 }
