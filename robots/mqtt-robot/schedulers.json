@@ -1,0 +1,35 @@
+[
+	{
+		"N": 1,
+		"C": 10,
+		"QPS": 0,
+		"Name": "Connect",
+		"-Display": true,
+		"-PrintReport": true
+	},
+	{
+		"N": 1,
+		"C": 10,
+		"QPS": 0,
+		"Name": "Subscribe",
+		"-Display": true,
+		"-PrintReport": true
+	},
+	{
+		"N": 1000,
+		"C": 50,
+		"QPS": 0,
+		"Sample": 200,
+		"Name": "Publish",
+		"-Display": true,
+		"PrintReport": true
+	},
+	{
+		"N": 1,
+		"C": 10,
+		"QPS": 10000,
+		"Name": "Disconnect",
+		"Display": false,
+		"PrintReport": false
+	}
+]
