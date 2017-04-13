@@ -5,8 +5,8 @@
 		"QPS": 1000,
 		"Name": "Connect",
 		"Sample": 0,
-		"Display": true,
-		"PrintReport": false
+		"Display": false,
+		"PrintReport": true
 	},
 	{
 		"N": 1,
@@ -14,8 +14,8 @@
 		"QPS": 1000,
 		"Name": "Prepare",
 		"Sample": 0,
-		"Display": true,
-		"PrintReport": false
+		"Display": false,
+		"PrintReport": true
 	},
 	{
 		"N": 100,
@@ -23,7 +23,7 @@
 		"QPS": 5000,
 		"Name": "Publish",
 		"Sample": 0,
-		"Display": true,
+		"Display": false,
 		"PrintReport": true
 	},
 	{
@@ -32,7 +32,7 @@
 		"QPS": 1000,
 		"Name": "Disconnect",
 		"Sample": 0,
-		"Display": true,
+		"Display": false,
 		"PrintReport": false
 	}
 ]

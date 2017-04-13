@@ -1,6 +1,10 @@
 package main
 
-import "github.com/ironzhang/toy/framework/robot"
+import (
+	"time"
+
+	"github.com/ironzhang/toy/framework/robot"
+)
 
 func NewRobots(n int, file string) ([]robot.Robot, error) {
 	robots := make([]robot.Robot, 0, n)
@@ -19,5 +23,13 @@ func (r *Robot) OK() bool {
 
 func (r *Robot) Do(name string) error {
 	//fmt.Println(name)
+	switch name {
+	case "Connect":
+		time.Sleep(10 * time.Millisecond)
+	case "Prepare":
+		time.Sleep(20 * time.Millisecond)
+	case "Publish":
+		time.Sleep(100 * time.Microsecond)
+	}
 	return nil
 }
