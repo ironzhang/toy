@@ -29,12 +29,12 @@ func (t *task) execute() result {
 }
 
 type Scheduler struct {
-	N    int
-	C    int
-	QPS  int
-	Name string
+	Name   string
+	N      int
+	C      int
+	QPS    int
+	Sample int
 
-	Sample      int
 	Display     bool
 	PrintReport bool
 
