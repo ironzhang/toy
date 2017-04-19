@@ -20,8 +20,10 @@ const (
 )
 
 func main() {
+	var ask bool
 	var robotNum int
 	var robotPath string
+	flag.BoolVar(&ask, "ask", false, "ask execute task")
 	flag.IntVar(&robotNum, "robot-num", 1, "run robot number")
 	flag.StringVar(&robotPath, "robot-path", "./robots/test-robot", "robot plugin path")
 	flag.Parse()
@@ -64,5 +66,5 @@ func main() {
 		<-c
 		defer cancel()
 	}()
-	(&framework.Work{Robots: robots, Schedulers: schedulers}).Run(ctx)
+	(&framework.Work{Ask: ask, Robots: robots, Schedulers: schedulers}).Run(ctx)
 }

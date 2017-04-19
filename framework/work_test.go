@@ -2,6 +2,7 @@ package framework
 
 import (
 	"context"
+	"fmt"
 	"sync/atomic"
 	"testing"
 
@@ -41,6 +42,7 @@ func TestWork(t *testing.T) {
 	}
 
 	w := Work{
+		Ask:    false,
 		Robots: robots,
 		Schedulers: []Scheduler{
 			{
@@ -95,5 +97,13 @@ func TestWork(t *testing.T) {
 		if wr.DisconnectCount != 1 {
 			t.Errorf("DisconnectCount: %d != 1", wr.DisconnectCount)
 		}
+	}
+}
+
+func ExampleAsk() {
+	if ask("TestAsk") {
+		fmt.Println("yes")
+	} else {
+		fmt.Println("no")
 	}
 }
