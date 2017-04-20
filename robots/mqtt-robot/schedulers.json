@@ -5,7 +5,7 @@
 		"QPS": 0,
 		"Name": "Connect",
 		"-Display": true,
-		"-PrintReport": true
+		"PrintReport": true
 	},
 	{
 		"N": 1,
@@ -13,10 +13,10 @@
 		"QPS": 0,
 		"Name": "Subscribe",
 		"-Display": true,
-		"-PrintReport": true
+		"PrintReport": true
 	},
 	{
-		"N": 1000,
+		"N": 1,
 		"C": 50,
 		"QPS": 0,
 		"Sample": 200,
