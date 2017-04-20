@@ -1,8 +1,8 @@
 [
 	{
 		"N": 1,
-		"C": 6,
-		"QPS": 0,
+		"C": 50,
+		"QPS": 4000,
 		"Name": "Connect",
 		"-Display": true,
 		"PrintReport": true
@@ -25,7 +25,7 @@
 		"PrintReport": true
 	},
 	{
-		"N": 1,
+		"N": 0,
 		"C": 10,
 		"QPS": 10000,
 		"Name": "Disconnect",

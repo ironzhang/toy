@@ -120,6 +120,7 @@ func (r *Robot) Disconnect() error {
 func (r *Robot) MqttClientOptions() *mqtt.ClientOptions {
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(addr)
+	opts.KeepAlive = time.Minute
 	opts.AutoReconnect = false
 	opts.DefaultPublishHander = r.OnMessage
 	opts.OnConnectionLost = r.OnConnectionLost
