@@ -9,20 +9,22 @@ import (
 
 func TestMakeReport(t *testing.T) {
 	tests := []struct {
-		name      string
-		request   int
-		qps       int
-		total     time.Duration
-		durations []time.Duration
-		wants     []time.Duration
+		name       string
+		request    int
+		concurrent int
+		qps        int
+		total      time.Duration
+		durations  []time.Duration
+		wants      []time.Duration
 	}{
 		{
-			name:      "test0",
-			request:   10,
-			qps:       100,
-			total:     10 * time.Second,
-			durations: []time.Duration{1 * time.Second, 2 * time.Second, 3 * time.Second, 100 * time.Millisecond, 200 * time.Millisecond},
-			wants:     []time.Duration{100 * time.Millisecond, 200 * time.Millisecond, 1 * time.Second, 2 * time.Second, 3 * time.Second},
+			name:       "test0",
+			request:    10,
+			concurrent: 2,
+			qps:        100,
+			total:      10 * time.Second,
+			durations:  []time.Duration{1 * time.Second, 2 * time.Second, 3 * time.Second, 100 * time.Millisecond, 200 * time.Millisecond},
+			wants:      []time.Duration{100 * time.Millisecond, 200 * time.Millisecond, 1 * time.Second, 2 * time.Second, 3 * time.Second},
 		},
 	}
 
@@ -34,12 +36,15 @@ func TestMakeReport(t *testing.T) {
 			results = append(results, result{duration: d})
 		}
 
-		r := makeReport(test.name, test.request, test.qps, test.total, results)
+		r := makeReport(test.name, test.request, test.concurrent, test.qps, test.total, results)
 		if r.name != test.name {
 			t.Errorf("name: %s != %s", r.name, test.name)
 		}
 		if r.request != test.request {
 			t.Errorf("request: %d != %d", r.request, test.request)
+		}
+		if r.concurrent != test.concurrent {
+			t.Errorf("concurrent: %d != %d", r.concurrent, test.concurrent)
 		}
 		if r.qps != test.qps {
 			t.Errorf("qps: %d != %d", r.qps, test.qps)

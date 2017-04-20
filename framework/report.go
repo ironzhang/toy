@@ -9,16 +9,17 @@ import (
 )
 
 type report struct {
-	name    string
-	request int
-	qps     int
-	total   time.Duration
-	average time.Duration
-	lats    []time.Duration
-	errs    map[string]int
+	name       string
+	request    int
+	concurrent int
+	qps        int
+	total      time.Duration
+	average    time.Duration
+	lats       []time.Duration
+	errs       map[string]int
 }
 
-func makeReport(name string, request, qps int, total time.Duration, results []result) *report {
+func makeReport(name string, request, concurrent, qps int, total time.Duration, results []result) *report {
 	var sum, ave time.Duration
 	errs := make(map[string]int)
 	lats := make([]time.Duration, 0, len(results))
@@ -36,13 +37,14 @@ func makeReport(name string, request, qps int, total time.Duration, results []re
 
 	sort.Slice(lats, func(i, j int) bool { return lats[i] < lats[j] })
 	return &report{
-		name:    name,
-		request: request,
-		qps:     qps,
-		total:   total,
-		average: ave,
-		lats:    lats,
-		errs:    errs,
+		name:       name,
+		request:    request,
+		concurrent: concurrent,
+		qps:        qps,
+		total:      total,
+		average:    ave,
+		lats:       lats,
+		errs:       errs,
 	}
 }
 
@@ -53,6 +55,7 @@ func (r *report) print(w io.Writer) {
 		fmt.Fprintf(w, "  Slowest:\t%s\n", r.lats[len(r.lats)-1])
 		fmt.Fprintf(w, "  Fastest:\t%s\n", r.lats[0])
 		fmt.Fprintf(w, "  Average:\t%s\n", r.average)
+		fmt.Fprintf(w, "  Concurrent:\t%d\n", r.concurrent)
 		fmt.Fprintf(w, "  Requests:\t%d/%d\n", len(r.lats), r.request)
 		fmt.Fprintf(w, "  Requests/sec:\t%4.4f/%d\n", float64(len(r.lats))/r.total.Seconds(), r.qps)
 		r.printHistogram(w)

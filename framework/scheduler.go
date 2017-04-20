@@ -128,7 +128,7 @@ func (s *Scheduler) Run(ctx context.Context, robots []robot.Robot) {
 		results = append(results, res)
 		if len(results) >= nres {
 			if s.PrintReport {
-				makeReport(s.Name, request, s.QPS, time.Since(start), results).print(s.writer())
+				makeReport(s.Name, request, s.C, s.QPS, time.Since(start), results).print(s.writer())
 			}
 			start = time.Now()
 			results = results[:0]
@@ -136,7 +136,7 @@ func (s *Scheduler) Run(ctx context.Context, robots []robot.Robot) {
 	}
 
 	if s.PrintReport && len(results) > 0 {
-		makeReport(s.Name, request, s.QPS, time.Since(start), results).print(s.writer())
+		makeReport(s.Name, request, s.C, s.QPS, time.Since(start), results).print(s.writer())
 	}
 }
 
