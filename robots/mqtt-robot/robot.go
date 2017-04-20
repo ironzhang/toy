@@ -44,7 +44,7 @@ func NewRobots(n int, file string) ([]robot.Robot, error) {
 
 	robots := make([]robot.Robot, 0, n)
 	for i := 1; i <= n; i++ {
-		robots = append(robots, &Robot{ok: true, id: opts.Start + i})
+		robots = append(robots, &Robot{ok: true, id: fmt.Sprint(opts.Start + i)})
 	}
 	return robots, nil
 }
@@ -53,7 +53,7 @@ type Robot struct {
 	ok bool
 	c  mqtt.Client
 
-	id int
+	id string
 }
 
 func (r *Robot) OK() bool {
@@ -89,7 +89,7 @@ func (r *Robot) Connect() error {
 }
 
 func (r *Robot) Subscribe() error {
-	t := r.c.Subscribe(fmt.Sprint(r.id), 0, nil)
+	t := r.c.Subscribe(r.id, 0, nil)
 	if !t.WaitTimeout(timeout) {
 		r.ok = false
 		return errTimeout
@@ -102,7 +102,7 @@ func (r *Robot) Subscribe() error {
 }
 
 func (r *Robot) Publish() error {
-	t := r.c.Publish(fmt.Sprint(r.id), 0, false, payload)
+	t := r.c.Publish(r.id, 0, false, payload)
 	if !t.WaitTimeout(timeout) {
 		return errTimeout
 	}
@@ -113,7 +113,7 @@ func (r *Robot) Publish() error {
 }
 
 func (r *Robot) Disconnect() error {
-	r.c.Disconnect(0)
+	r.c.Disconnect(200)
 	return nil
 }
 
