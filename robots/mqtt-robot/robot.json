@@ -1,5 +1,5 @@
 {
-	"Addr": "tcp://139.219.236.56:1883",
+	"Addr": "tcp://10.208.138.34:1883",
 	"Timeout": "1m",
 	"PayloadSize": 50,
 	"Start": 0

@@ -1,6 +1,6 @@
 {
-	"Addr": "tcp://139.219.236.56:1883",
-	"Timeout": "10s",
+	"Addr": "tcp://10.208.138.34:1883",
+	"Timeout": "30s",
 	"PayloadSize": 50,
 	"Start": {{ start }}
 }
