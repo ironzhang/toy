@@ -18,12 +18,14 @@ var errTimeout = errors.New("timeout")
 var (
 	addr    = "tcp://localhost:1883"
 	timeout = 5 * time.Second
+	qos     = byte(0)
 	payload = strings.Repeat("0", 50)
 )
 
 type Options struct {
 	Addr        string
 	Timeout     string
+	Qos         int
 	PayloadSize int
 	Start       int
 }
@@ -40,6 +42,7 @@ func NewRobots(n int, file string) ([]robot.Robot, error) {
 	if err != nil {
 		return nil, err
 	}
+	qos = byte(opts.Qos)
 	payload = strings.Repeat("0", opts.PayloadSize)
 
 	robots := make([]robot.Robot, 0, n)
@@ -89,7 +92,7 @@ func (r *Robot) Connect() error {
 }
 
 func (r *Robot) Subscribe() error {
-	t := r.c.Subscribe(r.id, 0, nil)
+	t := r.c.Subscribe(r.id, qos, nil)
 	if !t.WaitTimeout(timeout) {
 		r.ok = false
 		return errTimeout
@@ -102,7 +105,7 @@ func (r *Robot) Subscribe() error {
 }
 
 func (r *Robot) Publish() error {
-	t := r.c.Publish(r.id, 0, false, payload)
+	t := r.c.Publish(r.id, qos, false, payload)
 	if !t.WaitTimeout(timeout) {
 		return errTimeout
 	}

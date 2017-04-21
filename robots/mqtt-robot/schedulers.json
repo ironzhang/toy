@@ -1,27 +1,27 @@
 [
 	{
 		"N": 1,
-		"C": 10,
+		"C": 20,
 		"QPS": 0,
 		"Name": "Connect",
-		"Display": true,
-		"PrintReport": true
+		"-Display": true,
+		"-PrintReport": true
 	},
 	{
-		"N": 0,
+		"N": 1,
 		"C": 10,
 		"QPS": 0,
 		"Name": "Subscribe",
 		"-Display": true,
-		"PrintReport": true
+		"-PrintReport": true
 	},
 	{
-		"N": 0,
+		"N": 10,
 		"C": 50,
-		"QPS": 0,
+		"QPS": 850,
 		"Sample": 200,
 		"Name": "Publish",
-		"-Display": true,
+		"Display": true,
 		"PrintReport": true
 	},
 	{
