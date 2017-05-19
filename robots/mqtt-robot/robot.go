@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/eclipse/paho.mqtt.golang"
-	"github.com/ironzhang/golang/jsoncfg"
+	"github.com/ironzhang/matrix/jsoncfg"
 	"github.com/ironzhang/toy/framework/robot"
 	"github.com/sirupsen/logrus"
 )
@@ -16,15 +16,14 @@ import (
 var errTimeout = errors.New("timeout")
 
 var (
-	addr    = "tcp://localhost:1883"
-	timeout = 5 * time.Second
 	qos     = byte(0)
+	timeout = 5 * time.Second
 	payload = strings.Repeat("0", 50)
 )
 
 type Options struct {
-	Addr        string
-	Timeout     string
+	Addrs       []string
+	Timeout     jsoncfg.Duration
 	Qos         int
 	PayloadSize int
 	Start       int
@@ -37,17 +36,17 @@ func NewRobots(n int, file string) ([]robot.Robot, error) {
 		return nil, err
 	}
 
-	addr = opts.Addr
-	timeout, err = time.ParseDuration(opts.Timeout)
-	if err != nil {
-		return nil, err
+	if len(opts.Addrs) <= 0 {
+		return nil, errors.New("addrs is empty")
 	}
+
 	qos = byte(opts.Qos)
+	timeout = time.Duration(opts.Timeout)
 	payload = strings.Repeat("0", opts.PayloadSize)
 
 	robots := make([]robot.Robot, 0, n)
 	for i := 1; i <= n; i++ {
-		robots = append(robots, &Robot{ok: true, id: fmt.Sprint(opts.Start + i)})
+		robots = append(robots, &Robot{ok: true, addr: opts.Addrs[i%len(opts.Addrs)], id: fmt.Sprint(opts.Start + i)})
 	}
 	return robots, nil
 }
@@ -56,7 +55,8 @@ type Robot struct {
 	ok bool
 	c  mqtt.Client
 
-	id string
+	addr string
+	id   string
 }
 
 func (r *Robot) OK() bool {
@@ -122,7 +122,7 @@ func (r *Robot) Disconnect() error {
 
 func (r *Robot) MqttClientOptions() *mqtt.ClientOptions {
 	opts := mqtt.NewClientOptions()
-	opts.AddBroker(addr)
+	opts.AddBroker(r.addr)
 	opts.KeepAlive = time.Minute
 	opts.AutoReconnect = false
 	opts.DefaultPublishHander = r.OnMessage

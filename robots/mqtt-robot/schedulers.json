@@ -4,11 +4,11 @@
 		"C": 20,
 		"QPS": 0,
 		"Name": "Connect",
-		"-Display": true,
-		"-PrintReport": true
+		"Display": true,
+		"PrintReport": true
 	},
 	{
-		"N": 1,
+		"N": 0,
 		"C": 10,
 		"QPS": 0,
 		"Name": "Subscribe",
@@ -16,12 +16,12 @@
 		"-PrintReport": true
 	},
 	{
-		"N": 10,
-		"C": 50,
-		"QPS": 850,
-		"Sample": 200,
+		"N": 0,
+		"C": 10,
+		"QPS": 1000,
+		"Sample": 1,
 		"Name": "Publish",
-		"Display": true,
+		"-Display": true,
 		"PrintReport": true
 	},
 	{
