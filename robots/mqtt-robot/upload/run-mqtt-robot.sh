@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./toy -robot-path=./robots/mqtt-robot -robot-num=200000
+./toy -robot-path=./robots/mqtt-robot -robot-num=350000 -ask
