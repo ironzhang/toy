@@ -13,6 +13,11 @@ import (
 )
 
 var (
+	errRead  = errors.New("read error")
+	errWrite = errors.New("write error")
+)
+
+var (
 	Verbose          = true
 	Payload          = "hello, world"
 	ConnectTimeout   = 20 * time.Second
@@ -85,7 +90,7 @@ func (r *Robot) PingPong() (err error) {
 	r.c.SetWriteDeadline(time.Now().Add(ReadWriteTimeout))
 	if _, err = fmt.Fprintf(r.c, "%s\n", Payload); err != nil {
 		r.ok = false
-		return err
+		return errWrite
 	}
 
 	r.c.SetReadDeadline(time.Now().Add(ReadWriteTimeout))
@@ -93,7 +98,7 @@ func (r *Robot) PingPong() (err error) {
 	line, _, err := rd.ReadLine()
 	if err != nil {
 		r.ok = false
-		return err
+		return errRead
 	}
 	if Verbose {
 		fmt.Println(time.Now(), string(line))

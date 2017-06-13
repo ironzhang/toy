@@ -8,7 +8,7 @@
 		"PrintReport": true
 	},
 	{
-		"N": 1,
+		"N": 0,
 		"C": 10,
 		"QPS": 0,
 		"Name": "Subscribe",
@@ -16,7 +16,7 @@
 		"PrintReport": true
 	},
 	{
-		"N": 2,
+		"N": 0,
 		"C": 10,
 		"QPS": 3500,
 		"Sample": 1,
