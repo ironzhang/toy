@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"plugin"
 
-	"github.com/ironzhang/golang/jsoncfg"
+	"github.com/ironzhang/matrix/jsoncfg"
 	"github.com/ironzhang/toy/framework"
 	"github.com/ironzhang/toy/framework/robot"
 )
