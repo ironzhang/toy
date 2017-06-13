@@ -1,13 +1,14 @@
 package main
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
 	"net"
 	"strings"
 	"time"
 
+	"github.com/eclipse/paho.mqtt.golang/packets"
+	"github.com/ironzhang/gomqtt/pkg/packet"
 	"github.com/ironzhang/matrix/jsoncfg"
 	"github.com/ironzhang/toy/framework/robot"
 )
@@ -83,25 +84,52 @@ func (r *Robot) Connect() (err error) {
 		r.ok = false
 		return err
 	}
+
+	connect := packet.NewConnectPacket()
+	connect.Keepalive = 60
+	r.c.SetWriteDeadline(time.Now().Add(ReadWriteTimeout))
+	if err = connect.Write(r.c); err != nil {
+		r.ok = false
+		return err
+	}
+
+	r.c.SetReadDeadline(time.Now().Add(ReadWriteTimeout))
+	cp, err := packets.ReadPacket(r.c)
+	if err != nil {
+		r.ok = false
+		return err
+	}
+	connack, ok := cp.(*packets.ConnackPacket)
+	if !ok {
+		r.ok = false
+		return fmt.Errorf("read packet not a connack packet")
+	}
+	if connack.ReturnCode != packets.Accepted {
+		r.ok = false
+		if e, ok := packets.ConnErrors[connack.ReturnCode]; ok {
+			return e
+		}
+		return fmt.Errorf("connack.ReturnCode=%d", connack.ReturnCode)
+	}
+
 	return nil
 }
 
 func (r *Robot) PingPong() (err error) {
+	ping := packet.NewPingreqPacket()
 	r.c.SetWriteDeadline(time.Now().Add(ReadWriteTimeout))
-	if _, err = fmt.Fprintf(r.c, "%s\n", Payload); err != nil {
-		r.ok = false
-		return errWrite
+	if err = ping.Write(r.c); err != nil {
+		return err
 	}
 
 	r.c.SetReadDeadline(time.Now().Add(ReadWriteTimeout))
-	rd := bufio.NewReader(r.c)
-	line, _, err := rd.ReadLine()
+	cp, err := packets.ReadPacket(r.c)
 	if err != nil {
-		r.ok = false
-		return errRead
+		return err
 	}
-	if Verbose {
-		fmt.Println(time.Now(), string(line))
+	_, ok := cp.(*packets.PingrespPacket)
+	if !ok {
+		return fmt.Errorf("read packet not a pingresp packet")
 	}
 
 	return nil
