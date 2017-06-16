@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net"
 	"strings"
 	"time"
@@ -119,16 +120,19 @@ func (r *Robot) PingPong() (err error) {
 	ping := packet.NewPingreqPacket()
 	r.c.SetWriteDeadline(time.Now().Add(ReadWriteTimeout))
 	if err = ping.Write(r.c); err != nil {
+		log.Printf("write pingreq: %v", err)
 		return err
 	}
 
 	r.c.SetReadDeadline(time.Now().Add(ReadWriteTimeout))
 	cp, err := packets.ReadPacket(r.c)
 	if err != nil {
+		log.Printf("read pingresp: %v", err)
 		return err
 	}
 	_, ok := cp.(*packets.PingrespPacket)
 	if !ok {
+		log.Printf("read packet not a pingresp packet")
 		return fmt.Errorf("read packet not a pingresp packet")
 	}
 

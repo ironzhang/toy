@@ -16,14 +16,16 @@ import (
 var errTimeout = errors.New("timeout")
 
 var (
-	qos     = byte(0)
-	timeout = 5 * time.Second
-	payload = strings.Repeat("0", 50)
+	qos       = byte(0)
+	timeout   = 5 * time.Second
+	payload   = strings.Repeat("0", 50)
+	keepAlive = 60 * time.Second
 )
 
 type Options struct {
 	Addrs       []string
 	Timeout     jsoncfg.Duration
+	KeepAlive   jsoncfg.Duration
 	Qos         int
 	PayloadSize int
 	Start       int
@@ -42,6 +44,7 @@ func NewRobots(n int, file string) ([]robot.Robot, error) {
 
 	qos = byte(opts.Qos)
 	timeout = time.Duration(opts.Timeout)
+	keepAlive = time.Duration(opts.KeepAlive)
 	payload = strings.Repeat("0", opts.PayloadSize)
 
 	robots := make([]robot.Robot, 0, n)
@@ -123,7 +126,7 @@ func (r *Robot) Disconnect() error {
 func (r *Robot) MqttClientOptions() *mqtt.ClientOptions {
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(r.addr)
-	opts.KeepAlive = time.Minute
+	opts.KeepAlive = keepAlive
 	opts.AutoReconnect = false
 	opts.DefaultPublishHander = r.OnMessage
 	opts.OnConnectionLost = r.OnConnectionLost
