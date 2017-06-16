@@ -1,6 +1,7 @@
 {
 	"Addrs": ["tcp://localhost:1883", "tcp://localhost:2000"],
 	"Timeout": "30s",
+	"KeepAlive": "0s",
 	"Qos": 1,
 	"PayloadSize": 50,
 	"Start": 0
