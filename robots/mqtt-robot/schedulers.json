@@ -1,14 +1,14 @@
 [
 	{
 		"N": 1,
-		"C": 20,
+		"C": 10,
 		"QPS": 0,
 		"Name": "Connect",
 		"-Display": true,
 		"PrintReport": true
 	},
 	{
-		"N": 0,
+		"N": 1,
 		"C": 10,
 		"QPS": 0,
 		"Name": "Subscribe",
@@ -16,9 +16,9 @@
 		"PrintReport": true
 	},
 	{
-		"N": 0,
+		"N": 3,
 		"C": 10,
-		"QPS": 3500,
+		"QPS": 0,
 		"Sample": 1,
 		"Name": "Publish",
 		"-Display": true,
@@ -27,7 +27,7 @@
 	{
 		"N": 1,
 		"C": 10,
-		"QPS": 10000,
+		"QPS": 0,
 		"Name": "Disconnect",
 		"Display": false,
 		"PrintReport": false
