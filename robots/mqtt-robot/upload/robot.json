@@ -13,7 +13,8 @@
 	],
 	"Timeout": "10s",
 	"KeepAlive": "0s",
-	"Qos": 0,
+	"Topic": "ablecloud",
+	"Qos": 1,
 	"PayloadSize": 50,
 	"Start": {{ start }}
 }

@@ -16,6 +16,7 @@ import (
 var errTimeout = errors.New("timeout")
 
 var (
+	topic     = ""
 	qos       = byte(0)
 	timeout   = 5 * time.Second
 	payload   = strings.Repeat("0", 50)
@@ -26,6 +27,7 @@ type Options struct {
 	Addrs       []string
 	Timeout     jsoncfg.Duration
 	KeepAlive   jsoncfg.Duration
+	Topic       string
 	Qos         int
 	PayloadSize int
 	Start       int
@@ -42,6 +44,7 @@ func NewRobots(n int, file string) ([]robot.Robot, error) {
 		return nil, errors.New("addrs is empty")
 	}
 
+	topic = opts.Topic
 	qos = byte(opts.Qos)
 	timeout = time.Duration(opts.Timeout)
 	keepAlive = time.Duration(opts.KeepAlive)
@@ -108,7 +111,11 @@ func (r *Robot) Subscribe() error {
 }
 
 func (r *Robot) Publish() error {
-	t := r.c.Publish(r.id, qos, false, payload)
+	target := topic
+	if target == "" {
+		target = r.id
+	}
+	t := r.c.Publish(target, qos, false, payload)
 	if !t.WaitTimeout(timeout) {
 		return errTimeout
 	}

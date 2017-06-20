@@ -1,0 +1,6 @@
+{
+	"Addrs": ["http://localhost:8000"],
+	"Timeout": "30s",
+	"Qos": 1,
+	"PayloadSize": 50
+}

@@ -27,7 +27,7 @@
 	{
 		"N": 1,
 		"C": 10,
-		"QPS": 0,
+		"QPS": 5000,
 		"Name": "Disconnect",
 		"Display": false,
 		"PrintReport": false
