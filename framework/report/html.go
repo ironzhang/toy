@@ -4,32 +4,36 @@ import (
 	"fmt"
 	"html/template"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/wcharczuk/go-chart"
 )
 
-func OutputHTML(templateFile string, outdir string, reports []Report) (err error) {
+func OutputHTML(templateFile string, outdir string, reports []Report) error {
 	data := make([]*report, 0, len(reports))
 	for _, r := range reports {
-		if err = renderLatencyImage(fmt.Sprintf("%s/%s.png", outdir, r.Name), r.Records); err != nil {
+		img, err := renderLatencyImage(fmt.Sprintf("%s/%s.png", outdir, r.Name), r.Records)
+		if err != nil {
 			return err
 		}
-		data = append(data, makeReport(r.Name, r.Request, r.Concurrent, r.QPS, r.Total, r.Records))
+		r := makeReport(r.Name, r.Request, r.Concurrent, r.QPS, r.Total, r.Records)
+		r.LatencyImg = img
+		data = append(data, r)
 	}
 	return renderTemplate(templateFile, fmt.Sprintf("%s/report.html", outdir), data)
 }
 
-func renderLatencyImage(filename string, records []Record) error {
+func renderLatencyImage(filename string, records []Record) (string, error) {
+	if len(records) <= 1 {
+		return "", nil
+	}
+
 	f, err := os.Create(filename)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer f.Close()
-
-	if len(records) <= 1 {
-		return nil
-	}
 
 	n := len(records)
 	xvalues := make([]time.Time, n)
@@ -56,7 +60,7 @@ func renderLatencyImage(filename string, records []Record) error {
 			},
 		},
 	}
-	return graph.Render(chart.PNG, f)
+	return filepath.Base(filename), graph.Render(chart.PNG, f)
 }
 
 func renderTemplate(srcFile, dstFile string, data interface{}) error {

@@ -85,9 +85,9 @@ func main() {
 	flag.BoolVar(&Verbose, "verbose", false, "print verbose info")
 	flag.BoolVar(&ask, "ask", false, "ask execute task")
 	flag.BoolVar(&report, "report", false, "make report")
+	flag.StringVar(&recordFile, "record", "", "record file")
 	flag.IntVar(&robotNum, "robot-num", 1, "run robot number")
 	flag.StringVar(&robotPath, "robot-path", "./robots/test-robot", "robot plugin path")
-	flag.StringVar(&recordFile, "record-file", "", "test record file")
 	flag.Parse()
 
 	if report {

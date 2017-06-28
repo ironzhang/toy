@@ -43,6 +43,7 @@ type report struct {
 	RealRequest int
 	QPS         int
 	RealQPS     float64
+	LatencyImg  string
 	Latencies   []latency
 	Errs        map[string]int
 

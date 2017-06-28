@@ -1,9 +1,6 @@
 package report
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"reflect"
 	"testing"
@@ -104,49 +101,4 @@ func TestReport(t *testing.T) {
 	}
 	//r.Print(os.Stdout)
 	r.Print(ioutil.Discard)
-}
-
-func TestReportReadWrite(t *testing.T) {
-	var b bytes.Buffer
-
-	w1 := Report{
-		Name:       "1",
-		Total:      10 * time.Minute,
-		Concurrent: 2,
-		Request:    500,
-		QPS:        1000,
-		Records:    RandomRecords(500),
-	}
-	w2 := Report{
-		Name:       "2",
-		Total:      10 * time.Minute,
-		Concurrent: 2,
-		Request:    500,
-		QPS:        1000,
-		Records:    RandomRecords(500),
-	}
-
-	if err := w1.Write(&b); err != nil {
-		t.Fatal(err)
-	}
-	if err := w2.Write(&b); err != nil {
-		t.Fatal(err)
-	}
-	fmt.Println(b.String())
-
-	var r1, r2 Report
-	dec := json.NewDecoder(&b)
-	if err := dec.Decode(&r1); err != nil {
-		t.Fatal(err)
-	}
-	if err := dec.Decode(&r2); err != nil {
-		t.Fatal(err)
-	}
-
-	//	if err := r1.Read(&b); err != nil {
-	//		t.Fatal(err)
-	//	}
-	//	if err := r2.Read(&b); err != nil {
-	//		t.Fatal(err)
-	//	}
 }

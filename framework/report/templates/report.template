@@ -17,8 +17,10 @@
 			<tr align="left"> <th>Requests</th> <td>{{ .RealRequest }}/{{ .Request }}</td></tr>
 			<tr align="left"> <th>Requests/sec</th> <td>{{ .RealQPS }}/{{ .QPS }}</td></tr>
 		</table>
-	
-		<p><img src="{{ .Name }}.png"/></p>
+
+		{{ if .LatencyImg }}	
+		<p><img src="{{ .LatencyImg }}"/></p>
+		{{ end }}
 	
 		{{ if .Latencies }}
 		<h2>Latency distribution</h2>
