@@ -27,6 +27,10 @@ func renderLatencyImage(filename string, records []Record) error {
 	}
 	defer f.Close()
 
+	if len(records) <= 1 {
+		return nil
+	}
+
 	n := len(records)
 	xvalues := make([]time.Time, n)
 	yvalues := make([]float64, n)

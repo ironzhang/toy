@@ -2,7 +2,6 @@ package framework
 
 import (
 	"context"
-	"io/ioutil"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -32,7 +31,7 @@ func TestSchedulerN(t *testing.T) {
 		N: 1000,
 		C: 10,
 	}
-	e.Run(context.Background(), robots)
+	e.Run(context.Background(), robots, nil)
 
 	if int(r1.count) != e.N {
 		t.Errorf("count(%d) != %d", r1.count, e.N)
@@ -63,7 +62,7 @@ func TestSchedulerQPS1(t *testing.T) {
 		C:   2,
 		QPS: 1,
 	}
-	e.Run(context.Background(), robots)
+	e.Run(context.Background(), robots, nil)
 }
 
 func TestSchedulerQPS2(t *testing.T) {
@@ -71,20 +70,18 @@ func TestSchedulerQPS2(t *testing.T) {
 	robots := []robot.Robot{r}
 
 	(&Scheduler{
-		N:           10000,
-		C:           1,
-		QPS:         0,
-		PrintReport: true,
-		W:           ioutil.Discard,
-	}).Run(context.Background(), robots)
+		N:   10000,
+		C:   1,
+		QPS: 0,
+		//PrintReport: true,
+	}).Run(context.Background(), robots, nil)
 
 	(&Scheduler{
-		N:           10000,
-		C:           1,
-		QPS:         1000000,
-		PrintReport: true,
-		W:           ioutil.Discard,
-	}).Run(context.Background(), robots)
+		N:   10000,
+		C:   1,
+		QPS: 1000000,
+		//PrintReport: true,
+	}).Run(context.Background(), robots, nil)
 }
 
 func TestSchedulerDisplay(t *testing.T) {
@@ -92,16 +89,15 @@ func TestSchedulerDisplay(t *testing.T) {
 	robots := []robot.Robot{r1}
 
 	e := Scheduler{
-		N:           -1,
-		C:           2,
-		QPS:         10,
-		Name:        "TestSchedulerDisplay",
-		Display:     true,
-		PrintReport: true,
-		W:           ioutil.Discard,
+		N:       -1,
+		C:       2,
+		QPS:     10,
+		Name:    "TestSchedulerDisplay",
+		Display: true,
+		//PrintReport: true,
 	}
 	ctx, _ := context.WithDeadline(context.Background(), time.Now().Add(4*time.Second+300*time.Millisecond))
-	e.Run(ctx, robots)
+	e.Run(ctx, robots, nil)
 }
 
 func TestSchedulerRobotOK(t *testing.T) {
@@ -114,7 +110,7 @@ func TestSchedulerRobotOK(t *testing.T) {
 		C: 2,
 		//PrintReport: true,
 	}
-	e.Run(context.Background(), robots)
+	e.Run(context.Background(), robots, nil)
 
 	if r1.count != 5 {
 		t.Errorf("c1(%d) != 3", r1.count)

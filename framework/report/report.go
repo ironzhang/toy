@@ -1,7 +1,6 @@
 package report
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"sort"
@@ -22,10 +21,6 @@ type Report struct {
 	Request    int
 	QPS        int
 	Records    []Record
-}
-
-func (r *Report) Write(w io.Writer) error {
-	return json.NewEncoder(w).Encode(r)
 }
 
 func (r *Report) Print(w io.Writer) {

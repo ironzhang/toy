@@ -62,14 +62,13 @@ func TestWork(t *testing.T) {
 				PrintReport: false,
 			},
 			{
-				N:           100,
-				C:           100,
-				QPS:         5000,
-				Name:        "Publish",
-				Sample:      100,
-				Display:     true,
-				PrintReport: true,
-				//W:           ioutil.Discard,
+				N:      100,
+				C:      100,
+				QPS:    5000,
+				Name:   "Publish",
+				Sample: 100,
+				//Display:     true,
+				//PrintReport: true,
 			},
 			{
 				N:           1,
@@ -81,7 +80,7 @@ func TestWork(t *testing.T) {
 			},
 		},
 	}
-	w.Run(context.Background())
+	w.Run(context.Background(), nil)
 
 	for _, r := range robots {
 		wr := r.(*WorkRobot)

@@ -3,7 +3,6 @@ package framework
 import (
 	"context"
 	"fmt"
-	"io"
 	"os"
 	"sync"
 	"time"
@@ -40,15 +39,6 @@ type Scheduler struct {
 
 	Display     bool
 	PrintReport bool
-
-	W io.Writer `json:"-"`
-}
-
-func (s *Scheduler) writer() io.Writer {
-	if s.W == nil {
-		return os.Stdout
-	}
-	return s.W
 }
 
 func (s *Scheduler) infinite() bool {
@@ -104,7 +94,11 @@ func (s *Scheduler) produceTasks(ctx context.Context, robots []robot.Robot) <-ch
 	return taskc
 }
 
-func (s *Scheduler) Run(ctx context.Context, robots []robot.Robot) {
+type Encoder interface {
+	Encode(v interface{}) error
+}
+
+func (s *Scheduler) Run(ctx context.Context, robots []robot.Robot, enc Encoder) {
 	start := time.Now()
 	recordc := s.runWorkers(s.produceTasks(ctx, robots))
 
@@ -125,35 +119,45 @@ func (s *Scheduler) Run(ctx context.Context, robots []robot.Robot) {
 		done++
 		if s.Display && time.Since(prev) >= 500*time.Millisecond {
 			prev = time.Now()
-			fmt.Fprintf(s.writer(), "%s: %d requests done.\n", s.Name, done)
+			fmt.Fprintf(os.Stdout, "%s: %d requests done.\n", s.Name, done)
 		}
 
 		records = append(records, res)
 		if len(records) >= nres {
+			r := report.Report{
+				Name:       s.Name,
+				Total:      time.Since(start),
+				Concurrent: s.C,
+				Request:    request,
+				QPS:        s.QPS,
+				Records:    records,
+			}
+			if enc != nil {
+				enc.Encode(r)
+			}
 			if s.PrintReport {
-				(&report.Report{
-					Name:       s.Name,
-					Total:      time.Since(start),
-					Concurrent: s.C,
-					Request:    request,
-					QPS:        s.QPS,
-					Records:    records,
-				}).Print(s.writer())
+				r.Print(os.Stdout)
 			}
 			start = time.Now()
 			records = records[:0]
 		}
 	}
 
-	if s.PrintReport && len(records) > 0 {
-		(&report.Report{
+	if len(records) > 0 {
+		r := report.Report{
 			Name:       s.Name,
 			Total:      time.Since(start),
 			Concurrent: s.C,
 			Request:    request,
 			QPS:        s.QPS,
 			Records:    records,
-		}).Print(s.writer())
+		}
+		if enc != nil {
+			enc.Encode(r)
+		}
+		if s.PrintReport {
+			r.Print(os.Stdout)
+		}
 	}
 }
 

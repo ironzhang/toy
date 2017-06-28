@@ -2,14 +2,17 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"os/signal"
 	"plugin"
 
 	"github.com/ironzhang/matrix/jsoncfg"
 	"github.com/ironzhang/toy/framework"
+	"github.com/ironzhang/toy/framework/report"
 	"github.com/ironzhang/toy/framework/robot"
 )
 
@@ -17,16 +20,83 @@ const (
 	ROBOT_SO        = "robot.so"
 	ROBOT_JSON      = "robot.json"
 	SCHEDULERS_JSON = "schedulers.json"
+
+	OUTPUT_DIR      = "./output"
+	REPORT_TEMPLATE = "./framework/report/templates/report.template"
 )
+
+var (
+	Verbose bool
+)
+
+func LoadReportsFromFile(file string) (reports []report.Report, err error) {
+	f, err := os.Open(file)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	dec := json.NewDecoder(f)
+	for {
+		var r report.Report
+		if err = dec.Decode(&r); err != nil {
+			if err == io.EOF {
+				break
+			}
+			return nil, err
+		}
+		if Verbose {
+			r.Print(os.Stdout)
+		}
+		reports = append(reports, r)
+	}
+	return reports, nil
+}
+
+func LoadReports(files []string) ([]report.Report, error) {
+	var reports []report.Report
+	for _, file := range files {
+		rs, err := LoadReportsFromFile(file)
+		if err != nil {
+			return nil, fmt.Errorf("load reports from %q: %v", file, err)
+		}
+		reports = append(reports, rs...)
+	}
+	return reports, nil
+}
+
+func MakeReport() error {
+	reports, err := LoadReports(flag.Args())
+	if err != nil {
+		return fmt.Errorf("load reports: %v", err)
+	}
+	if err = report.OutputHTML(REPORT_TEMPLATE, OUTPUT_DIR, reports); err != nil {
+		return fmt.Errorf("output html: %v", err)
+	}
+	return nil
+}
 
 func main() {
 	var ask bool
+	var report bool
 	var robotNum int
 	var robotPath string
+	var recordFile string
+	flag.BoolVar(&Verbose, "verbose", false, "print verbose info")
 	flag.BoolVar(&ask, "ask", false, "ask execute task")
+	flag.BoolVar(&report, "report", false, "make report")
 	flag.IntVar(&robotNum, "robot-num", 1, "run robot number")
 	flag.StringVar(&robotPath, "robot-path", "./robots/test-robot", "robot plugin path")
+	flag.StringVar(&recordFile, "record-file", "", "test record file")
 	flag.Parse()
+
+	if report {
+		if err := MakeReport(); err != nil {
+			fmt.Printf("make report: %v\n", err)
+			return
+		}
+		return
+	}
 
 	p, err := plugin.Open(fmt.Sprintf("%s/%s", robotPath, ROBOT_SO))
 	if err != nil {
@@ -59,6 +129,17 @@ func main() {
 		return
 	}
 
+	var enc framework.Encoder
+	if recordFile != "" {
+		f, err := os.Create(recordFile)
+		if err != nil {
+			fmt.Printf("create record file: %v\n", err)
+			return
+		}
+		defer f.Close()
+		enc = json.NewEncoder(f)
+	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
 		c := make(chan os.Signal, 1)
@@ -67,5 +148,5 @@ func main() {
 		cancel()
 	}()
 
-	(&framework.Work{Ask: ask, Robots: robots, Schedulers: schedulers}).Run(ctx)
+	(&framework.Work{Ask: ask, Robots: robots, Schedulers: schedulers}).Run(ctx, enc)
 }

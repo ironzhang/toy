@@ -14,13 +14,13 @@ type Work struct {
 	Schedulers []Scheduler
 }
 
-func (w *Work) Run(ctx context.Context) {
+func (w *Work) Run(ctx context.Context, enc Encoder) {
 	for _, s := range w.Schedulers {
 		if s.N != 0 {
 			if w.Ask && !ask(s.Name) {
 				continue
 			}
-			s.Run(ctx, w.Robots)
+			s.Run(ctx, w.Robots, enc)
 		}
 	}
 }
