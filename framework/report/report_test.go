@@ -79,7 +79,7 @@ func TestPrintLatencies(t *testing.T) {
 	for i := 0; i < n; i++ {
 		lats[i] = time.Duration(i+1) * time.Millisecond
 	}
-	r := report{latencies: latencyDistribution(lats)}
+	r := report{Latencies: latencyDistribution(lats)}
 	//r.printLatencies(os.Stdout)
 	r.printLatencies(ioutil.Discard)
 }

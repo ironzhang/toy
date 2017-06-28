@@ -1,6 +1,7 @@
 package report
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"sort"
@@ -23,6 +24,10 @@ type Report struct {
 	Records    []Record
 }
 
+func (r *Report) Write(w io.Writer) error {
+	return json.NewEncoder(w).Encode(r)
+}
+
 func (r *Report) Print(w io.Writer) {
 	makeReport(r.Name, r.Request, r.Concurrent, r.QPS, r.Total, r.Records).print(w)
 }
@@ -43,7 +48,7 @@ type report struct {
 	RealRequest int
 	QPS         int
 	RealQPS     float64
-	latencies   []latency
+	Latencies   []latency
 	Errs        map[string]int
 
 	lats []time.Duration
@@ -81,7 +86,7 @@ func makeReport(name string, request, concurrent, qps int, total time.Duration, 
 		RealRequest: len(lats),
 		QPS:         qps,
 		RealQPS:     float64(len(lats)) / total.Seconds(),
-		latencies:   latencyDistribution(lats),
+		Latencies:   latencyDistribution(lats),
 		Errs:        errs,
 		lats:        lats,
 	}
@@ -151,7 +156,7 @@ func (r *report) printHistogram(w io.Writer) {
 
 func (r *report) printLatencies(w io.Writer) {
 	fmt.Fprintf(w, "\nLatency distribution:\n")
-	for _, lat := range r.latencies {
+	for _, lat := range r.Latencies {
 		fmt.Fprintf(w, "  %d%% in %s\n", lat.Percent, lat.Duration)
 	}
 }
