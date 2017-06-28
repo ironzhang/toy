@@ -1,0 +1,42 @@
+<html>
+
+<head>
+	<meta charset="utf8"/>
+</head>
+
+<body>
+	{{ range .}}
+	<div>
+		<h1>{{ .Name }}</h1>
+		<table border="0">
+			<tr align="left"> <th>Total</th> <td>{{ .Total }}</td></tr>
+			<tr align="left"> <th>Slowest</th> <td>{{ .Slowest }}</td></tr>
+			<tr align="left"> <th>Fastest</th> <td>{{ .Fastest }}</td></tr>
+			<tr align="left"> <th>Average</th> <td>{{ .Average }}</td></tr>
+			<tr align="left"> <th>Concurrent</th> <td>{{ .Concurrent }}</td></tr>
+			<tr align="left"> <th>Requests</th> <td>{{ .RealRequest }}/{{ .Request }}</td></tr>
+			<tr align="left"> <th>Requests/sec</th> <td>{{ .RealQPS }}/{{ .QPS }}</td></tr>
+		</table>
+	
+		<p><img src="{{ .LatencyImg }}"/></p>
+	
+		{{ if .Latencys }}
+		<h2>Latency distribution</h2>
+		{{ range .Latencys }}
+		<p>{{ .Percent }}% in {{ .Duration}}</p>
+		{{ end }}
+		{{ end }}
+	
+		{{ if .Errs }}
+		<h2>Error distribution</h2>
+		<table border="1" cellspacing="0" cellpadding="4">
+			{{ range $key, $value := .Errs }}
+			<tr align="left"><td>{{ $key }} </td> <td>{{ $value }}</td></tr>
+			{{ end }}
+		</table>
+		{{ end }}
+	</div>
+	{{ end }}
+
+</body>
+</html>

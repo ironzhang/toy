@@ -27,19 +27,30 @@ func (r *Report) Print(w io.Writer) {
 	makeReport(r.Name, r.Request, r.Concurrent, r.QPS, r.Total, r.Records).print(w)
 }
 
+type latency struct {
+	Percent  int
+	Duration time.Duration
+}
+
 type report struct {
-	name       string
-	request    int
-	concurrent int
-	qps        int
-	total      time.Duration
-	average    time.Duration
-	lats       []time.Duration
-	errs       map[string]int
+	Name        string
+	Total       time.Duration
+	Slowest     time.Duration
+	Fastest     time.Duration
+	Average     time.Duration
+	Concurrent  int
+	Request     int
+	RealRequest int
+	QPS         int
+	RealQPS     float64
+	latencies   []latency
+	Errs        map[string]int
+
+	lats []time.Duration
 }
 
 func makeReport(name string, request, concurrent, qps int, total time.Duration, records []Record) *report {
-	var sum, ave time.Duration
+	var sum time.Duration
 	errs := make(map[string]int)
 	lats := make([]time.Duration, 0, len(records))
 	for _, r := range records {
@@ -50,38 +61,47 @@ func makeReport(name string, request, concurrent, qps int, total time.Duration, 
 			lats = append(lats, r.Elapse)
 		}
 	}
+	sort.Slice(lats, func(i, j int) bool { return lats[i] < lats[j] })
+
+	var average, slowest, fastest time.Duration
 	if len(lats) > 0 {
-		ave = sum / time.Duration(len(lats))
+		average = sum / time.Duration(len(lats))
+		slowest = lats[len(lats)-1]
+		fastest = lats[0]
 	}
 
-	sort.Slice(lats, func(i, j int) bool { return lats[i] < lats[j] })
 	return &report{
-		name:       name,
-		request:    request,
-		concurrent: concurrent,
-		qps:        qps,
-		total:      total,
-		average:    ave,
-		lats:       lats,
-		errs:       errs,
+		Name:        name,
+		Total:       total,
+		Slowest:     slowest,
+		Fastest:     fastest,
+		Average:     average,
+		Concurrent:  concurrent,
+		Request:     request,
+		RealRequest: len(lats),
+		QPS:         qps,
+		RealQPS:     float64(len(lats)) / total.Seconds(),
+		latencies:   latencyDistribution(lats),
+		Errs:        errs,
+		lats:        lats,
 	}
 }
 
 func (r *report) print(w io.Writer) {
-	fmt.Fprintf(w, "\nSummary: %s\n", r.name)
+	fmt.Fprintf(w, "\nSummary: %s\n", r.Name)
 	if len(r.lats) > 0 {
-		fmt.Fprintf(w, "  Total:\t%s\n", r.total)
-		fmt.Fprintf(w, "  Slowest:\t%s\n", r.lats[len(r.lats)-1])
-		fmt.Fprintf(w, "  Fastest:\t%s\n", r.lats[0])
-		fmt.Fprintf(w, "  Average:\t%s\n", r.average)
-		fmt.Fprintf(w, "  Concurrent:\t%d\n", r.concurrent)
-		fmt.Fprintf(w, "  Requests:\t%d/%d\n", len(r.lats), r.request)
-		fmt.Fprintf(w, "  Requests/sec:\t%4.4f/%d\n", float64(len(r.lats))/r.total.Seconds(), r.qps)
+		fmt.Fprintf(w, "  Total:\t%s\n", r.Total)
+		fmt.Fprintf(w, "  Slowest:\t%s\n", r.Slowest)
+		fmt.Fprintf(w, "  Fastest:\t%s\n", r.Fastest)
+		fmt.Fprintf(w, "  Average:\t%s\n", r.Average)
+		fmt.Fprintf(w, "  Concurrent:\t%d\n", r.Concurrent)
+		fmt.Fprintf(w, "  Requests:\t%d/%d\n", r.RealRequest, r.Request)
+		fmt.Fprintf(w, "  Requests/sec:\t%4.4f/%d\n", r.RealQPS, r.QPS)
 		r.printHistogram(w)
 		r.printLatencies(w)
 	}
 
-	if len(r.errs) > 0 {
+	if len(r.Errs) > 0 {
 		r.printErrors(w)
 	}
 
@@ -130,13 +150,27 @@ func (r *report) printHistogram(w io.Writer) {
 }
 
 func (r *report) printLatencies(w io.Writer) {
+	fmt.Fprintf(w, "\nLatency distribution:\n")
+	for _, lat := range r.latencies {
+		fmt.Fprintf(w, "  %d%% in %s\n", lat.Percent, lat.Duration)
+	}
+}
+
+func (r *report) printErrors(w io.Writer) {
+	fmt.Fprintf(w, "\nError distribution:\n")
+	for err, num := range r.Errs {
+		fmt.Fprintf(w, "  [%d]\t%s\n", num, err)
+	}
+}
+
+func latencyDistribution(lats []time.Duration) []latency {
 	pctls := []int{10, 25, 50, 75, 90, 95, 99}
 	data := make([]time.Duration, len(pctls))
 
-	n := len(r.lats)
+	n := len(lats)
 	for i, p := range pctls {
 		k := (p*n - 1) / 100
-		data[i] = r.lats[k]
+		data[i] = lats[k]
 	}
 	for i := range data {
 		if i+1 < len(data) && data[i] == data[i+1] {
@@ -144,17 +178,11 @@ func (r *report) printLatencies(w io.Writer) {
 		}
 	}
 
-	fmt.Fprintf(w, "\nLatency distribution:\n")
+	latencies := make([]latency, 0, len(pctls))
 	for i := 0; i < len(pctls); i++ {
 		if data[i] > 0 {
-			fmt.Fprintf(w, "  %d%% in %s\n", pctls[i], data[i])
+			latencies = append(latencies, latency{Percent: pctls[i], Duration: data[i]})
 		}
 	}
-}
-
-func (r *report) printErrors(w io.Writer) {
-	fmt.Fprintf(w, "\nError distribution:\n")
-	for err, num := range r.errs {
-		fmt.Fprintf(w, "  [%d]\t%s\n", num, err)
-	}
+	return latencies
 }
