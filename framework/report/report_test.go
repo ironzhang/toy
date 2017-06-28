@@ -1,4 +1,4 @@
-package framework
+package report
 
 import (
 	"io/ioutil"
@@ -30,10 +30,10 @@ func TestMakeReport(t *testing.T) {
 
 	for _, test := range tests {
 		var sum time.Duration
-		results := make([]result, 0, len(test.durations))
+		results := make([]Record, 0, len(test.durations))
 		for _, d := range test.durations {
 			sum += d
-			results = append(results, result{duration: d})
+			results = append(results, Record{Elapse: d})
 		}
 
 		r := makeReport(test.name, test.request, test.concurrent, test.qps, test.total, results)
@@ -82,4 +82,21 @@ func TestPrintLatencies(t *testing.T) {
 	r := report{lats: lats}
 	//r.printLatencies(os.Stdout)
 	r.printLatencies(ioutil.Discard)
+}
+
+func TestReport(t *testing.T) {
+	r := Report{
+		Name:       "TestReport",
+		Total:      10 * time.Second,
+		Concurrent: 2,
+		Request:    10,
+		QPS:        100,
+		Records: []Record{
+			{Elapse: 1 * time.Second},
+			{Elapse: 2 * time.Second},
+			{Elapse: 3 * time.Second},
+			{Elapse: 4 * time.Second},
+		},
+	}
+	r.Print(ioutil.Discard)
 }

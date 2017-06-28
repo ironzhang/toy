@@ -3,7 +3,7 @@ package main
 import (
 	"testing"
 
-	"github.com/ironzhang/golang/jsoncfg"
+	"github.com/ironzhang/matrix/jsoncfg"
 	"github.com/ironzhang/toy/framework"
 )
 

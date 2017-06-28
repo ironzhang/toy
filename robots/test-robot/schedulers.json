@@ -1,38 +1,38 @@
 [
 	{
-		"N": 1,
-		"C": 10,
-		"QPS": 1000,
 		"Name": "Connect",
-		"Sample": 0,
-		"Display": false,
-		"PrintReport": true
-	},
-	{
 		"N": 1,
 		"C": 10,
 		"QPS": 1000,
-		"Name": "Prepare",
 		"Sample": 0,
-		"Display": false,
-		"PrintReport": true
+		"Display": true,
+		"PrintReport": false
 	},
 	{
+		"Name": "Prepare",
+		"N": 1,
+		"C": 10,
+		"QPS": 1000,
+		"Sample": 0,
+		"Display": true,
+		"PrintReport": false
+	},
+	{
+		"Name": "Publish",
 		"N": 100,
 		"C": 100,
 		"QPS": 5000,
-		"Name": "Publish",
 		"Sample": 0,
-		"Display": false,
+		"Display": true,
 		"PrintReport": true
 	},
 	{
+		"Name": "Disconnect",
 		"N": 1,
 		"C": 10,
 		"QPS": 1000,
-		"Name": "Disconnect",
 		"Sample": 0,
-		"Display": false,
+		"Display": true,
 		"PrintReport": false
 	}
 ]

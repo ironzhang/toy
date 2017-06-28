@@ -1,4 +1,4 @@
-package framework
+package report
 
 import (
 	"fmt"
@@ -7,6 +7,25 @@ import (
 	"strings"
 	"time"
 )
+
+type Record struct {
+	Err    string
+	Start  time.Time
+	Elapse time.Duration
+}
+
+type Report struct {
+	Name       string
+	Total      time.Duration
+	Concurrent int
+	Request    int
+	QPS        int
+	Records    []Record
+}
+
+func (r *Report) Print(w io.Writer) {
+	makeReport(r.Name, r.Request, r.Concurrent, r.QPS, r.Total, r.Records).print(w)
+}
 
 type report struct {
 	name       string
@@ -19,16 +38,16 @@ type report struct {
 	errs       map[string]int
 }
 
-func makeReport(name string, request, concurrent, qps int, total time.Duration, results []result) *report {
+func makeReport(name string, request, concurrent, qps int, total time.Duration, records []Record) *report {
 	var sum, ave time.Duration
 	errs := make(map[string]int)
-	lats := make([]time.Duration, 0, len(results))
-	for _, res := range results {
-		if res.err != nil {
-			errs[res.err.Error()]++
+	lats := make([]time.Duration, 0, len(records))
+	for _, r := range records {
+		if r.Err != "" {
+			errs[r.Err]++
 		} else {
-			sum += res.duration
-			lats = append(lats, res.duration)
+			sum += r.Elapse
+			lats = append(lats, r.Elapse)
 		}
 	}
 	if len(lats) > 0 {
@@ -49,8 +68,8 @@ func makeReport(name string, request, concurrent, qps int, total time.Duration, 
 }
 
 func (r *report) print(w io.Writer) {
+	fmt.Fprintf(w, "\nSummary: %s\n", r.name)
 	if len(r.lats) > 0 {
-		fmt.Fprintf(w, "\nSummary: %s\n", r.name)
 		fmt.Fprintf(w, "  Total:\t%s\n", r.total)
 		fmt.Fprintf(w, "  Slowest:\t%s\n", r.lats[len(r.lats)-1])
 		fmt.Fprintf(w, "  Fastest:\t%s\n", r.lats[0])

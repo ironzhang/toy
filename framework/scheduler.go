@@ -8,24 +8,27 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ironzhang/toy/framework/report"
 	"github.com/ironzhang/toy/framework/robot"
 )
-
-type result struct {
-	err      error
-	duration time.Duration
-}
 
 type task struct {
 	name  string
 	robot robot.Robot
 }
 
-func (t *task) execute() result {
+func errorstr(err error) string {
+	if err != nil {
+		return err.Error()
+	}
+	return ""
+}
+
+func (t *task) execute() report.Record {
 	s := time.Now()
 	e := t.robot.Do(t.name)
 	d := time.Since(s)
-	return result{err: e, duration: d}
+	return report.Record{Err: errorstr(e), Start: s.UTC(), Elapse: d}
 }
 
 type Scheduler struct {
@@ -103,7 +106,7 @@ func (s *Scheduler) produceTasks(ctx context.Context, robots []robot.Robot) <-ch
 
 func (s *Scheduler) Run(ctx context.Context, robots []robot.Robot) {
 	start := time.Now()
-	resultc := s.runWorkers(s.produceTasks(ctx, robots))
+	recordc := s.runWorkers(s.produceTasks(ctx, robots))
 
 	var nres int
 	var request int
@@ -117,52 +120,66 @@ func (s *Scheduler) Run(ctx context.Context, robots []robot.Robot) {
 
 	done := 0
 	prev := start
-	results := make([]result, 0, nres)
-	for res := range resultc {
+	records := make([]report.Record, 0, nres)
+	for res := range recordc {
 		done++
 		if s.Display && time.Since(prev) >= 500*time.Millisecond {
 			prev = time.Now()
 			fmt.Fprintf(s.writer(), "%s: %d requests done.\n", s.Name, done)
 		}
 
-		results = append(results, res)
-		if len(results) >= nres {
+		records = append(records, res)
+		if len(records) >= nres {
 			if s.PrintReport {
-				makeReport(s.Name, request, s.C, s.QPS, time.Since(start), results).print(s.writer())
+				(&report.Report{
+					Name:       s.Name,
+					Total:      time.Since(start),
+					Concurrent: s.C,
+					Request:    request,
+					QPS:        s.QPS,
+					Records:    records,
+				}).Print(s.writer())
 			}
 			start = time.Now()
-			results = results[:0]
+			records = records[:0]
 		}
 	}
 
-	if s.PrintReport && len(results) > 0 {
-		makeReport(s.Name, request, s.C, s.QPS, time.Since(start), results).print(s.writer())
+	if s.PrintReport && len(records) > 0 {
+		(&report.Report{
+			Name:       s.Name,
+			Total:      time.Since(start),
+			Concurrent: s.C,
+			Request:    request,
+			QPS:        s.QPS,
+			Records:    records,
+		}).Print(s.writer())
 	}
 }
 
-func (s *Scheduler) runWorkers(taskc <-chan task) <-chan result {
-	resultc := make(chan result, s.C)
+func (s *Scheduler) runWorkers(taskc <-chan task) <-chan report.Record {
+	recordc := make(chan report.Record, s.C)
 
 	var wg sync.WaitGroup
 	wg.Add(s.C)
 
 	for i := 0; i < s.C; i++ {
 		go func() {
-			runWorker(taskc, resultc)
+			runWorker(taskc, recordc)
 			wg.Done()
 		}()
 	}
 
 	go func() {
 		wg.Wait()
-		close(resultc)
+		close(recordc)
 	}()
 
-	return resultc
+	return recordc
 }
 
-func runWorker(taskc <-chan task, resultc chan<- result) {
+func runWorker(taskc <-chan task, recordc chan<- report.Record) {
 	for t := range taskc {
-		resultc <- t.execute()
+		recordc <- t.execute()
 	}
 }
