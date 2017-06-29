@@ -27,7 +27,7 @@ func TestOutputHTML(t *testing.T) {
 			Concurrent: 2,
 			Request:    500,
 			QPS:        1000,
-			Records:    RandomRecords(500),
+			Records:    RandomRecords(5002),
 		},
 		{
 			Name:       "Publish",
@@ -35,7 +35,7 @@ func TestOutputHTML(t *testing.T) {
 			Concurrent: 2,
 			Request:    500,
 			QPS:        1000,
-			Records:    RandomRecords(500),
+			Records:    RandomRecords(5000),
 		},
 	}
 

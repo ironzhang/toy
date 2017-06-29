@@ -11,9 +11,11 @@ import (
 )
 
 func OutputHTML(templateFile string, outdir string, reports []Report) error {
+	os.MkdirAll(outdir, os.ModePerm)
 	data := make([]*report, 0, len(reports))
 	for _, r := range reports {
-		img, err := renderLatencyImage(fmt.Sprintf("%s/%s.png", outdir, r.Name), r.Records)
+		records := sampling(r.Records, 500)
+		img, err := renderLatencyImage(fmt.Sprintf("%s/%s.png", outdir, r.Name), records)
 		if err != nil {
 			return err
 		}
@@ -76,4 +78,26 @@ func renderTemplate(srcFile, dstFile string, data interface{}) error {
 	defer f.Close()
 
 	return t.Execute(f, data)
+}
+
+func sample(records []Record) Record {
+	var d time.Duration
+	for _, r := range records {
+		d += r.Elapse
+	}
+	return Record{Start: records[len(records)/2].Start, Elapse: d / time.Duration(len(records))}
+}
+
+func sampling(records []Record, size int) []Record {
+	n := len(records)
+	if n <= size {
+		return records
+	}
+
+	sampleN := n / size
+	samples := make([]Record, size)
+	for i := 0; i < size; i++ {
+		samples[i] = sample(records[i*sampleN : (i+1)*sampleN])
+	}
+	return samples
 }
