@@ -76,7 +76,7 @@ func (b *Builder) buildHTML(reports []*report) error {
 	return renderTemplate(f, b.Template, reports)
 }
 
-func (b *Builder) BuildReport(reports []Report) error {
+func (b *Builder) Build(reports []Report) error {
 	os.MkdirAll(b.OutputDir, os.ModePerm)
 	data := make([]*report, 0, len(reports))
 	for _, r := range mergeReports(reports) {

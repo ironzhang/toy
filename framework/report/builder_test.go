@@ -19,7 +19,16 @@ func RandomRecords(n int) []Record {
 	return records
 }
 
-func TestOutputHTML(t *testing.T) {
+func ErrorRecords(n int) []Record {
+	errs := []string{"timeout", "eof"}
+	records := make([]Record, n)
+	for i := 0; i < n; i++ {
+		records[i] = Record{Err: errs[rand.Int()%len(errs)]}
+	}
+	return records
+}
+
+func TestBuilder(t *testing.T) {
 	reports := []Report{
 		{
 			Name:       "Connect",
@@ -27,7 +36,15 @@ func TestOutputHTML(t *testing.T) {
 			Concurrent: 2,
 			Request:    500,
 			QPS:        1000,
-			Records:    RandomRecords(5002),
+			Records:    append(RandomRecords(200), ErrorRecords(100)...),
+		},
+		{
+			Name:       "Connect",
+			Total:      12 * time.Minute,
+			Concurrent: 2,
+			Request:    500,
+			QPS:        1000,
+			Records:    RandomRecords(200),
 		},
 		{
 			Name:       "Publish",
@@ -37,14 +54,21 @@ func TestOutputHTML(t *testing.T) {
 			QPS:        1000,
 			Records:    RandomRecords(5000),
 		},
+		{
+			Name:       "Disconnect",
+			Total:      10 * time.Minute,
+			Concurrent: 2,
+			Request:    500,
+			QPS:        1000,
+			Records:    ErrorRecords(100),
+		},
 	}
-
 	b := Builder{
 		Template:   "./templates/report.template",
 		OutputDir:  "./output",
-		SampleSize: 300,
+		SampleSize: 500,
 	}
-	if err := b.BuildReport(reports); err != nil {
+	if err := b.Build(reports); err != nil {
 		t.Fatal(err)
 	}
 }
