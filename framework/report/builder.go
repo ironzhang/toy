@@ -123,25 +123,3 @@ func renderTemplate(srcFile, dstFile string, data interface{}) error {
 
 	return t.Execute(f, data)
 }
-
-func sample(records []Record) Record {
-	var d time.Duration
-	for _, r := range records {
-		d += r.Elapse
-	}
-	return Record{Start: records[len(records)/2].Start, Elapse: d / time.Duration(len(records))}
-}
-
-func sampling(records []Record, size int) []Record {
-	n := len(records)
-	if n <= size {
-		return records
-	}
-
-	sampleN := n / size
-	samples := make([]Record, size)
-	for i := 0; i < size; i++ {
-		samples[i] = sample(records[i*sampleN : (i+1)*sampleN])
-	}
-	return samples
-}
