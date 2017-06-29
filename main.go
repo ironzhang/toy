@@ -1,12 +1,10 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"fmt"
 	"io"
 	"os"
-	"os/signal"
 	"plugin"
 
 	"github.com/ironzhang/matrix/jsoncfg"
@@ -76,8 +74,8 @@ func MakeReport() error {
 		OutputDir:  OUTPUT_DIR,
 		SampleSize: 500,
 	}
-	if err = b.MakeHTML(reports); err != nil {
-		return fmt.Errorf("make html: %v", err)
+	if err = b.Build(reports); err != nil {
+		return fmt.Errorf("build report: %v", err)
 	}
 	return nil
 }
@@ -146,13 +144,5 @@ func main() {
 		enc = codec.NewEncoder(f)
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
-	go func() {
-		c := make(chan os.Signal, 1)
-		signal.Notify(c, os.Interrupt)
-		<-c
-		cancel()
-	}()
-
-	(&framework.Work{Ask: ask, Robots: robots, Schedulers: schedulers}).Run(ctx, enc)
+	(&framework.Work{Ask: ask, Encoder: enc, Robots: robots, Schedulers: schedulers}).Run()
 }

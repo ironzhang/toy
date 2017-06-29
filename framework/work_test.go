@@ -1,7 +1,6 @@
 package framework
 
 import (
-	"context"
 	"fmt"
 	"sync/atomic"
 	"testing"
@@ -80,7 +79,7 @@ func TestWork(t *testing.T) {
 			},
 		},
 	}
-	w.Run(context.Background(), nil)
+	w.Run()
 
 	for _, r := range robots {
 		wr := r.(*WorkRobot)

@@ -3,6 +3,8 @@ package framework
 import (
 	"context"
 	"fmt"
+	"os"
+	"os/signal"
 	"strings"
 
 	"github.com/ironzhang/toy/framework/codec"
@@ -11,19 +13,32 @@ import (
 
 type Work struct {
 	Ask        bool
+	Encoder    codec.Encoder
 	Robots     []robot.Robot
 	Schedulers []Scheduler
 }
 
-func (w *Work) Run(ctx context.Context, enc codec.Encoder) {
+func (w *Work) Run() {
 	for _, s := range w.Schedulers {
 		if s.N != 0 {
-			if w.Ask && !ask(s.Name) {
-				continue
-			}
-			s.Run(ctx, w.Robots, enc)
+			w.schedule(&s)
 		}
 	}
+}
+
+func (w *Work) schedule(s *Scheduler) {
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, os.Interrupt)
+		<-c
+		cancel()
+	}()
+
+	if w.Ask && !ask(s.Name) {
+		return
+	}
+	s.Run(ctx, w.Robots, w.Encoder)
 }
 
 func ask(name string) bool {
