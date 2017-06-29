@@ -23,8 +23,18 @@ type Report struct {
 	Records    []Record
 }
 
+func (r *Report) merge(a Report) {
+	if r.Total < a.Total {
+		r.Total = a.Total
+	}
+	r.Concurrent += a.Concurrent
+	r.Request += a.Request
+	r.QPS += a.QPS
+	r.Records = append(r.Records, a.Records...)
+}
+
 func (r *Report) Print(w io.Writer) {
-	makeReport(r.Name, r.Request, r.Concurrent, r.QPS, r.Total, r.Records).print(w)
+	makeReport(r.Name, r.Request, r.Concurrent, r.QPS, r.Total, "", r.Records).print(w)
 }
 
 type latency struct {
@@ -50,7 +60,7 @@ type report struct {
 	lats []time.Duration
 }
 
-func makeReport(name string, request, concurrent, qps int, total time.Duration, records []Record) *report {
+func makeReport(name string, request, concurrent, qps int, total time.Duration, latencyImg string, records []Record) *report {
 	var sum time.Duration
 	errs := make(map[string]int)
 	lats := make([]time.Duration, 0, len(records))
@@ -84,6 +94,7 @@ func makeReport(name string, request, concurrent, qps int, total time.Duration, 
 		RealRequest: len(lats),
 		QPS:         qps,
 		RealQPS:     float64(len(lats)) / total.Seconds(),
+		LatencyImg:  latencyImg,
 		Latencies:   latencies,
 		Errs:        errs,
 		lats:        lats,

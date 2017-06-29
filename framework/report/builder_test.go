@@ -42,9 +42,9 @@ func TestOutputHTML(t *testing.T) {
 	b := Builder{
 		Template:   "./templates/report.template",
 		OutputDir:  "./output",
-		SampleSize: 600,
+		SampleSize: 300,
 	}
-	if err := b.MakeHTML(reports); err != nil {
+	if err := b.BuildReport(reports); err != nil {
 		t.Fatal(err)
 	}
 }
