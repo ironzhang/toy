@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"os"
 	"path/filepath"
+	"sort"
 	"time"
 
 	"github.com/wcharczuk/go-chart"
@@ -14,7 +15,7 @@ func OutputHTML(templateFile string, outdir string, reports []Report) error {
 	os.MkdirAll(outdir, os.ModePerm)
 	data := make([]*report, 0, len(reports))
 	for _, r := range reports {
-		records := sampling(r.Records, 500)
+		records := processRecords(r.Records)
 		img, err := renderLatencyImage(fmt.Sprintf("%s/%s.png", outdir, r.Name), records)
 		if err != nil {
 			return err
@@ -24,6 +25,11 @@ func OutputHTML(templateFile string, outdir string, reports []Report) error {
 		data = append(data, r)
 	}
 	return renderTemplate(templateFile, fmt.Sprintf("%s/report.html", outdir), data)
+}
+
+func processRecords(records []Record) []Record {
+	sort.Slice(records, func(i, j int) bool { return records[i].Start.Before(records[j].Start) })
+	return sampling(records, 500)
 }
 
 func renderLatencyImage(filename string, records []Record) (string, error) {
