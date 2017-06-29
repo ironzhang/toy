@@ -15,7 +15,7 @@
 			<tr align="left"> <th>Average</th> <td>{{ .Average }}</td></tr>
 			<tr align="left"> <th>Concurrent</th> <td>{{ .Concurrent }}</td></tr>
 			<tr align="left"> <th>Requests</th> <td>{{ .RealRequest }}/{{ .Request }}</td></tr>
-			<tr align="left"> <th>Requests/sec</th> <td>{{ .RealQPS }}/{{ .QPS }}</td></tr>
+			<tr align="left"> <th>Requests/sec</th> <td>{{ printf "%.4f" .RealQPS }}/{{ .QPS }}</td></tr>
 		</table>
 
 		{{ if .LatencyImg }}	

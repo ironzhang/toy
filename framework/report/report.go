@@ -64,8 +64,10 @@ func makeReport(name string, request, concurrent, qps int, total time.Duration, 
 	}
 	sort.Slice(lats, func(i, j int) bool { return lats[i] < lats[j] })
 
+	var latencies []latency
 	var average, slowest, fastest time.Duration
 	if len(lats) > 0 {
+		latencies = latencyDistribution(lats)
 		average = sum / time.Duration(len(lats))
 		slowest = lats[len(lats)-1]
 		fastest = lats[0]
@@ -82,7 +84,7 @@ func makeReport(name string, request, concurrent, qps int, total time.Duration, 
 		RealRequest: len(lats),
 		QPS:         qps,
 		RealQPS:     float64(len(lats)) / total.Seconds(),
-		Latencies:   latencyDistribution(lats),
+		Latencies:   latencies,
 		Errs:        errs,
 		lats:        lats,
 	}

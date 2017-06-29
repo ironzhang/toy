@@ -1,5 +1,5 @@
 {
-	"Addrs": ["tcp://localhost:1883", "tcp://localhost:2000"],
+	"Addrs": ["tcp://localhost:1883"],
 	"Timeout": "30s",
 	"KeepAlive": "0s",
 	"Topic": "",
