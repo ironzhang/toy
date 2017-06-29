@@ -126,7 +126,9 @@ func (r *Robot) Publish() error {
 }
 
 func (r *Robot) Disconnect() error {
-	r.c.Disconnect(200)
+	if r.c.IsConnected() {
+		r.c.Disconnect(200)
+	}
 	return nil
 }
 
