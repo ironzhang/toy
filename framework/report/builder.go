@@ -11,12 +11,19 @@ import (
 	"github.com/wcharczuk/go-chart"
 )
 
-func OutputHTML(templateFile string, outdir string, reports []Report) error {
-	os.MkdirAll(outdir, os.ModePerm)
+type Builder struct {
+	Template   string
+	OutputDir  string
+	SampleSize int
+}
+
+func (b *Builder) MakeHTML(reports []Report) error {
+	os.MkdirAll(b.OutputDir, os.ModePerm)
+
+	reports = mergeReports(reports)
 	data := make([]*report, 0, len(reports))
 	for _, r := range reports {
-		records := processRecords(r.Records)
-		img, err := renderLatencyImage(fmt.Sprintf("%s/%s.png", outdir, r.Name), records)
+		img, err := renderLatencyImage(fmt.Sprintf("%s/%s.png", b.OutputDir, r.Name), r.Records, b.SampleSize)
 		if err != nil {
 			return err
 		}
@@ -24,15 +31,43 @@ func OutputHTML(templateFile string, outdir string, reports []Report) error {
 		r.LatencyImg = img
 		data = append(data, r)
 	}
-	return renderTemplate(templateFile, fmt.Sprintf("%s/report.html", outdir), data)
+	return renderTemplate(b.Template, fmt.Sprintf("%s/report.html", b.OutputDir), data)
 }
 
-func processRecords(records []Record) []Record {
-	sort.Slice(records, func(i, j int) bool { return records[i].Start.Before(records[j].Start) })
-	return sampling(records, 500)
+func mergeReports(reports []Report) []Report {
+	results := make([]Report, 0)
+	for _, r := range reports {
+		lookup := false
+		for i := range results {
+			if results[i].Name == r.Name {
+				results[i] = mergeReport(results[i], r)
+				lookup = true
+				break
+			}
+		}
+		if !lookup {
+			results = append(results, r)
+		}
+	}
+	return results
 }
 
-func renderLatencyImage(filename string, records []Record) (string, error) {
+func mergeReport(a Report, b Report) Report {
+	var c Report
+	c.Name = a.Name
+	if a.Total > b.Total {
+		c.Total = a.Total
+	} else {
+		c.Total = b.Total
+	}
+	c.Concurrent = a.Concurrent + b.Concurrent
+	c.Request = a.Request + b.Request
+	c.QPS = a.QPS + b.QPS
+	c.Records = append(a.Records, b.Records...)
+	return c
+}
+
+func renderLatencyImage(filename string, records []Record, sampleSize int) (string, error) {
 	if len(records) <= 1 {
 		return "", nil
 	}
@@ -42,6 +77,9 @@ func renderLatencyImage(filename string, records []Record) (string, error) {
 		return "", err
 	}
 	defer f.Close()
+
+	sort.Slice(records, func(i, j int) bool { return records[i].Start.Before(records[j].Start) })
+	records = sampling(records, sampleSize)
 
 	n := len(records)
 	xvalues := make([]time.Time, n)

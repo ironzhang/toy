@@ -14,7 +14,7 @@ func RandomRecords(n int) []Record {
 	now := time.Now()
 	records := make([]Record, n)
 	for i := 0; i < n; i++ {
-		records[i] = Record{Start: now.Add(time.Duration(i) * time.Second), Elapse: time.Duration(random(10, 500)) * time.Millisecond}
+		records[i] = Record{Start: now.Add(time.Duration(i) * time.Second).UTC(), Elapse: time.Duration(random(10, 500)) * time.Millisecond}
 	}
 	return records
 }
@@ -39,7 +39,12 @@ func TestOutputHTML(t *testing.T) {
 		},
 	}
 
-	if err := OutputHTML("./templates/report.template", "./output", reports); err != nil {
+	b := Builder{
+		Template:   "./templates/report.template",
+		OutputDir:  "./output",
+		SampleSize: 600,
+	}
+	if err := b.MakeHTML(reports); err != nil {
 		t.Fatal(err)
 	}
 }

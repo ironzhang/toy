@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/ironzhang/matrix/jsoncfg"
 	"github.com/ironzhang/toy/framework"
+	"github.com/ironzhang/toy/framework/codec"
 	"github.com/ironzhang/toy/framework/report"
 	"github.com/ironzhang/toy/framework/robot"
 )
@@ -36,7 +36,7 @@ func LoadReportsFromFile(file string) (reports []report.Report, err error) {
 	}
 	defer f.Close()
 
-	dec := json.NewDecoder(f)
+	dec := codec.NewDecoder(f)
 	for {
 		var r report.Report
 		if err = dec.Decode(&r); err != nil {
@@ -70,8 +70,14 @@ func MakeReport() error {
 	if err != nil {
 		return fmt.Errorf("load reports: %v", err)
 	}
-	if err = report.OutputHTML(REPORT_TEMPLATE, OUTPUT_DIR, reports); err != nil {
-		return fmt.Errorf("output html: %v", err)
+
+	b := report.Builder{
+		Template:   REPORT_TEMPLATE,
+		OutputDir:  OUTPUT_DIR,
+		SampleSize: 500,
+	}
+	if err = b.MakeHTML(reports); err != nil {
+		return fmt.Errorf("make html: %v", err)
 	}
 	return nil
 }
@@ -129,7 +135,7 @@ func main() {
 		return
 	}
 
-	var enc framework.Encoder
+	var enc codec.Encoder
 	if recordFile != "" {
 		f, err := os.Create(recordFile)
 		if err != nil {
@@ -137,7 +143,7 @@ func main() {
 			return
 		}
 		defer f.Close()
-		enc = json.NewEncoder(f)
+		enc = codec.NewEncoder(f)
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())

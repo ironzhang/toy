@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ironzhang/toy/framework/codec"
 	"github.com/ironzhang/toy/framework/report"
 	"github.com/ironzhang/toy/framework/robot"
 )
@@ -94,11 +95,7 @@ func (s *Scheduler) produceTasks(ctx context.Context, robots []robot.Robot) <-ch
 	return taskc
 }
 
-type Encoder interface {
-	Encode(v interface{}) error
-}
-
-func (s *Scheduler) Run(ctx context.Context, robots []robot.Robot, enc Encoder) {
+func (s *Scheduler) Run(ctx context.Context, robots []robot.Robot, enc codec.Encoder) {
 	start := time.Now()
 	recordc := s.runWorkers(s.produceTasks(ctx, robots))
 

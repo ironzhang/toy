@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/ironzhang/toy/framework/codec"
 	"github.com/ironzhang/toy/framework/robot"
 )
 
@@ -14,7 +15,7 @@ type Work struct {
 	Schedulers []Scheduler
 }
 
-func (w *Work) Run(ctx context.Context, enc Encoder) {
+func (w *Work) Run(ctx context.Context, enc codec.Encoder) {
 	for _, s := range w.Schedulers {
 		if s.N != 0 {
 			if w.Ask && !ask(s.Name) {
