@@ -3,13 +3,13 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io"
 	"os"
 	"plugin"
 
 	"github.com/ironzhang/matrix/jsoncfg"
 	"github.com/ironzhang/toy/framework"
 	"github.com/ironzhang/toy/framework/codec"
+	"github.com/ironzhang/toy/framework/load"
 	"github.com/ironzhang/toy/framework/report"
 	"github.com/ironzhang/toy/framework/robot"
 )
@@ -27,44 +27,11 @@ var (
 	Verbose bool
 )
 
-func LoadReportsFromFile(file string) (reports []report.Report, err error) {
-	f, err := os.Open(file)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-
-	dec := codec.NewDecoder(f)
-	for {
-		var r report.Report
-		if err = dec.Decode(&r); err != nil {
-			if err == io.EOF {
-				break
-			}
-			return nil, err
-		}
-		if Verbose {
-			r.Print(os.Stdout)
-		}
-		reports = append(reports, r)
-	}
-	return reports, nil
-}
-
-func LoadReports(files []string) ([]report.Report, error) {
-	var reports []report.Report
-	for _, file := range files {
-		rs, err := LoadReportsFromFile(file)
-		if err != nil {
-			return nil, fmt.Errorf("load reports from %q: %v", file, err)
-		}
-		reports = append(reports, rs...)
-	}
-	return reports, nil
-}
-
 func MakeReport() error {
-	reports, err := LoadReports(flag.Args())
+	l := load.Loader{
+		Verbose: Verbose,
+	}
+	reports, err := l.Load(flag.Args()...)
 	if err != nil {
 		return fmt.Errorf("load reports: %v", err)
 	}
