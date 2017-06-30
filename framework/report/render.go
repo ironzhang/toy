@@ -37,6 +37,23 @@ func renderLatencies(w io.Writer, records []Record) error {
 	return graph.Render(chart.PNG, w)
 }
 
+func renderHistogram(w io.Writer, buckets []bucket) error {
+	values := make([]chart.Value, len(buckets))
+	for i := 0; i < len(values); i++ {
+		values[i].Value = float64(buckets[i].c)
+		values[i].Label = buckets[i].d.String()
+	}
+
+	graph := chart.BarChart{
+		XAxis: chart.Style{Show: true},
+		YAxis: chart.YAxis{
+			Style: chart.Style{Show: true},
+		},
+		Bars: values,
+	}
+	return graph.Render(chart.PNG, w)
+}
+
 func renderTemplate(w io.Writer, filename string, data interface{}) error {
 	t, err := template.ParseFiles(filename)
 	if err != nil {

@@ -36,7 +36,7 @@ func TestMakeReport(t *testing.T) {
 			results = append(results, Record{Elapse: d})
 		}
 
-		r := makeReport(test.name, test.request, test.concurrent, test.qps, test.total, "", results)
+		r := makeReport(test.name, test.request, test.concurrent, test.qps, test.total, results)
 		if r.Name != test.name {
 			t.Errorf("name: %s != %s", r.Name, test.name)
 		}

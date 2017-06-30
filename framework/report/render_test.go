@@ -35,8 +35,8 @@ func TestRenderLatencies(t *testing.T) {
 	os.Remove(filename)
 }
 
-func TestRenderTemplate(t *testing.T) {
-	filename := "report.html"
+func TestRenderHistogram(t *testing.T) {
+	filename := "histogram.png"
 
 	f, err := os.Create(filename)
 	if err != nil {
@@ -44,12 +44,35 @@ func TestRenderTemplate(t *testing.T) {
 	}
 	defer f.Close()
 
-	reports := []*report{
-		makeReport("test", 200, 10, 1000, 10*time.Second, "", MakeTestRecords(100)),
+	buckets := []bucket{
+		{d: time.Second, c: 10},
+		{d: 2 * time.Second, c: 20},
+		{d: 3 * time.Second, c: 30},
+		{d: 4 * time.Second, c: 40},
+		{d: 5 * time.Second, c: 30},
 	}
-	if err := renderTemplate(f, "./templates/report.template", reports); err != nil {
+	if err := renderHistogram(f, buckets); err != nil {
 		t.Error(err)
 	}
 
 	os.Remove(filename)
 }
+
+//func TestRenderTemplate(t *testing.T) {
+//	filename := "report.html"
+//
+//	f, err := os.Create(filename)
+//	if err != nil {
+//		t.Fatal(err)
+//	}
+//	defer f.Close()
+//
+//	reports := []*report{
+//		makeReport("test", 200, 10, 1000, 10*time.Second, MakeTestRecords(100)),
+//	}
+//	if err := renderTemplate(f, "./templates/report.template", reports); err != nil {
+//		t.Error(err)
+//	}
+//
+//	os.Remove(filename)
+//}

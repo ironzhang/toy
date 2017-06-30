@@ -66,25 +66,50 @@ func (b *Builder) buildImage(r Report) (string, error) {
 	return filepath.Base(filename), renderLatencies(f, records)
 }
 
-func (b *Builder) buildHTML(reports []*report) error {
+func (b *Builder) buildHistogramImage(r *report) (string, error) {
+	if len(r.lats) <= 0 {
+		return "", nil
+	}
+
+	filename := fmt.Sprintf("%s/%s_histogram.png", b.OutputDir, r.Name)
+	f, err := os.Create(filename)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+
+	buckets := histogramBucket(r.lats)
+	return filepath.Base(filename), renderHistogram(f, buckets)
+}
+
+func (b *Builder) buildHTML(data interface{}) error {
 	filename := fmt.Sprintf("%s/report.html", b.OutputDir)
 	f, err := os.Create(filename)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	return renderTemplate(f, b.Template, reports)
+	return renderTemplate(f, b.Template, data)
 }
 
 func (b *Builder) Build(reports []Report) error {
 	os.MkdirAll(b.OutputDir, os.ModePerm)
-	data := make([]*report, 0, len(reports))
+	var data []map[string]interface{}
 	for _, r := range mergeReports(reports) {
-		img, err := b.buildImage(r)
+		m := make(map[string]interface{})
+		report := makeReport(r.Name, r.Request, r.Concurrent, r.QPS, r.Total, r.Records)
+		latenciesImg, err := b.buildImage(r)
 		if err != nil {
 			return err
 		}
-		data = append(data, makeReport(r.Name, r.Request, r.Concurrent, r.QPS, r.Total, img, r.Records))
+		histogramImg, err := b.buildHistogramImage(report)
+		if err != nil {
+			return err
+		}
+		m["report"] = report
+		m["latenciesImg"] = latenciesImg
+		m["histogramImg"] = histogramImg
+		data = append(data, m)
 	}
 	return b.buildHTML(data)
 }

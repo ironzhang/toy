@@ -34,7 +34,7 @@ func (r *Report) merge(a Report) {
 }
 
 func (r *Report) Print(w io.Writer) {
-	makeReport(r.Name, r.Request, r.Concurrent, r.QPS, r.Total, "", r.Records).print(w)
+	makeReport(r.Name, r.Request, r.Concurrent, r.QPS, r.Total, r.Records).print(w)
 }
 
 type latency struct {
@@ -53,14 +53,13 @@ type report struct {
 	RealRequest int
 	QPS         int
 	RealQPS     float64
-	LatencyImg  string
 	Latencies   []latency
 	Errs        map[string]int
 
 	lats []time.Duration
 }
 
-func makeReport(name string, request, concurrent, qps int, total time.Duration, latencyImg string, records []Record) *report {
+func makeReport(name string, request, concurrent, qps int, total time.Duration, records []Record) *report {
 	var sum time.Duration
 	errs := make(map[string]int)
 	lats := make([]time.Duration, 0, len(records))
@@ -94,7 +93,6 @@ func makeReport(name string, request, concurrent, qps int, total time.Duration, 
 		RealRequest: len(lats),
 		QPS:         qps,
 		RealQPS:     float64(len(lats)) / total.Seconds(),
-		LatencyImg:  latencyImg,
 		Latencies:   latencies,
 		Errs:        errs,
 		lats:        lats,
@@ -123,32 +121,11 @@ func (r *report) print(w io.Writer) {
 }
 
 func (r *report) printHistogram(w io.Writer) {
-	type bucket struct {
-		d time.Duration
-		c int
-	}
-
-	bc := 10
-	buckets := make([]bucket, bc+1)
-	fastest := r.lats[0]
-	slowest := r.lats[len(r.lats)-1]
-	bs := (slowest - fastest) / time.Duration(bc)
-	for i := 0; i < bc; i++ {
-		buckets[i].d = fastest + bs*time.Duration(i)
-	}
-	buckets[bc].d = slowest
-
-	bi := 0
 	max := 0
-	for i := 0; i < len(r.lats); {
-		if r.lats[i] <= buckets[bi].d {
-			buckets[bi].c++
-			if max < buckets[bi].c {
-				max = buckets[bi].c
-			}
-			i++
-		} else if bi < len(buckets)-1 {
-			bi++
+	buckets := histogramBucket(r.lats)
+	for _, b := range buckets {
+		if b.c > max {
+			max = b.c
 		}
 	}
 
@@ -199,4 +176,33 @@ func latencyDistribution(lats []time.Duration) []latency {
 		}
 	}
 	return latencies
+}
+
+type bucket struct {
+	d time.Duration
+	c int
+}
+
+func histogramBucket(lats []time.Duration) []bucket {
+	bc := 10
+	buckets := make([]bucket, bc+1)
+	fastest := lats[0]
+	slowest := lats[len(lats)-1]
+	bs := (slowest - fastest) / time.Duration(bc)
+	for i := 0; i < bc; i++ {
+		buckets[i].d = fastest + bs*time.Duration(i)
+	}
+	buckets[bc].d = slowest
+
+	bi := 0
+	for i := 0; i < len(lats); {
+		if lats[i] <= buckets[bi].d {
+			buckets[bi].c++
+			i++
+		} else if bi < len(buckets)-1 {
+			bi++
+		}
+	}
+
+	return buckets
 }
