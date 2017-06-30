@@ -78,7 +78,11 @@ func doStats(records []Record) (fastest, slowest, average time.Duration, lats []
 }
 
 func calcQPS(n int, d time.Duration) int {
-	return int(float64(n) / d.Seconds())
+	x := d.Seconds()
+	if x == 0 {
+		panic("calcQPS: duration is zoro")
+	}
+	return int(float64(n) / x)
 }
 
 type Results []Result
