@@ -57,7 +57,7 @@ func (b *Builder) buildImage(r Report) (string, error) {
 		return "", nil
 	}
 
-	filename := fmt.Sprintf("%s/%s.png", b.OutputDir, r.Name)
+	filename := fmt.Sprintf("%s/%s_latencies.png", b.OutputDir, r.Name)
 	f, err := os.Create(filename)
 	if err != nil {
 		return "", err
