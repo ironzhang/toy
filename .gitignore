@@ -1,4 +1,6 @@
 toy
 *.so
 *.rd
-output
+*.gob
+*.png
+*.html
