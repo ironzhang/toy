@@ -1,6 +1,7 @@
 package report
 
 import (
+	"fmt"
 	"html/template"
 	"io"
 	"time"
@@ -18,6 +19,7 @@ func renderLatencies(w io.Writer, records []Record) error {
 	}
 
 	graph := chart.Chart{
+		Width: 1500,
 		XAxis: chart.XAxis{
 			Style:          chart.StyleShow(),
 			ValueFormatter: chart.TimeMinuteValueFormatter,
@@ -41,10 +43,11 @@ func renderHistogram(w io.Writer, buckets []bucket) error {
 	values := make([]chart.Value, len(buckets))
 	for i := 0; i < len(values); i++ {
 		values[i].Value = float64(buckets[i].c)
-		values[i].Label = buckets[i].d.String()
+		values[i].Label = fmt.Sprintf("%s [%d]", buckets[i].d.String(), buckets[i].c)
 	}
 
 	graph := chart.BarChart{
+		Width: 1500,
 		XAxis: chart.Style{Show: true},
 		YAxis: chart.YAxis{
 			Style: chart.Style{Show: true},
