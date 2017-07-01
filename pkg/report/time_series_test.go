@@ -1,4 +1,4 @@
-package tbr
+package report
 
 import (
 	"reflect"
