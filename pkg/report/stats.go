@@ -18,7 +18,7 @@ type Stats struct {
 	Errs        map[string]int
 }
 
-func (s *Stats) Histogram() (buckets []time.Duration, counts []int) {
+func (s *Stats) Histogram() (buckets []time.Duration, counts []int, max int) {
 	bc := 10
 	buckets = make([]time.Duration, bc+1)
 	counts = make([]int, bc+1)
@@ -31,13 +31,16 @@ func (s *Stats) Histogram() (buckets []time.Duration, counts []int) {
 	bi := 0
 	for i := 0; i < len(s.Lats); {
 		if s.Lats[i] <= buckets[bi] {
-			counts[bi]++
 			i++
+			counts[bi]++
+			if max < counts[bi] {
+				max = counts[bi]
+			}
 		} else if bi < len(buckets)-1 {
 			bi++
 		}
 	}
-	return buckets, counts
+	return buckets, counts, max
 }
 
 var pctls = []float64{10, 25, 50, 75, 90, 95, 99, 99.9}

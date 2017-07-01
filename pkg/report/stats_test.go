@@ -11,6 +11,7 @@ func TestStatsHistogram(t *testing.T) {
 		lats    []time.Duration
 		buckets []time.Duration
 		counts  []int
+		max     int
 	}{
 		// case0
 		{
@@ -41,6 +42,7 @@ func TestStatsHistogram(t *testing.T) {
 				0, //10
 				0, //11
 			},
+			max: 1,
 		},
 
 		// case1
@@ -72,6 +74,7 @@ func TestStatsHistogram(t *testing.T) {
 				0, //10
 				1, //11
 			},
+			max: 1,
 		},
 
 		// case2
@@ -127,6 +130,7 @@ func TestStatsHistogram(t *testing.T) {
 				0, //10
 				2, //11
 			},
+			max: 3,
 		},
 	}
 	for i, tt := range tests {
@@ -135,12 +139,15 @@ func TestStatsHistogram(t *testing.T) {
 			Slowest: tt.lats[len(tt.lats)-1],
 			Lats:    tt.lats,
 		}
-		buckets, counts := s.Histogram()
+		buckets, counts, max := s.Histogram()
 		if got, want := buckets, tt.buckets; !reflect.DeepEqual(got, want) {
 			t.Errorf("case%d: buckets: %v != %v", i, got, want)
 		}
 		if got, want := counts, tt.counts; !reflect.DeepEqual(got, want) {
 			t.Errorf("case%d: buckets: %v != %v", i, got, want)
+		}
+		if got, want := max, tt.max; got != want {
+			t.Errorf("case%d: max: %v != %v", i, got, want)
 		}
 	}
 }
