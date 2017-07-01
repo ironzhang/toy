@@ -149,3 +149,229 @@ func TestCalcQPS(t *testing.T) {
 		}
 	}
 }
+
+func TestResultMerge(t *testing.T) {
+	ts := time.Now()
+	tests := []struct {
+		a Result
+		b Result
+		c Result
+	}{
+		{
+			a: Result{},
+			b: Result{},
+			c: Result{},
+		},
+
+		{
+			a: Result{
+				QPS: 1, Request: 2, Concurrent: 3, Total: 4 * time.Second,
+				Records: []Record{
+					{Start: ts, Latency: 1 * time.Second},
+				},
+			},
+			b: Result{},
+			c: Result{
+				QPS: 1, Request: 2, Concurrent: 3, Total: 4 * time.Second,
+				Records: []Record{
+					{Start: ts, Latency: 1 * time.Second},
+				},
+			},
+		},
+
+		{
+			a: Result{
+				QPS: 1, Request: 2, Concurrent: 3, Total: 4 * time.Second,
+				Records: []Record{
+					{Start: ts, Latency: 1 * time.Second},
+				},
+			},
+			b: Result{
+				QPS: 2, Request: 4, Concurrent: 6, Total: 8 * time.Second,
+				Records: []Record{
+					{Start: ts, Latency: 2 * time.Second},
+					{Start: ts, Latency: 3 * time.Second},
+				},
+			},
+			c: Result{
+				QPS: 3, Request: 6, Concurrent: 9, Total: 8 * time.Second,
+				Records: []Record{
+					{Start: ts, Latency: 1 * time.Second},
+					{Start: ts, Latency: 2 * time.Second},
+					{Start: ts, Latency: 3 * time.Second},
+				},
+			},
+		},
+
+		{
+			a: Result{
+				QPS: 2, Request: 4, Concurrent: 6, Total: 8 * time.Second,
+				Records: []Record{
+					{Start: ts, Latency: 2 * time.Second},
+					{Start: ts, Latency: 3 * time.Second},
+				},
+			},
+			b: Result{
+				QPS: 1, Request: 2, Concurrent: 3, Total: 4 * time.Second,
+				Records: []Record{
+					{Start: ts, Latency: 1 * time.Second},
+				},
+			},
+			c: Result{
+				QPS: 3, Request: 6, Concurrent: 9, Total: 8 * time.Second,
+				Records: []Record{
+					{Start: ts, Latency: 2 * time.Second},
+					{Start: ts, Latency: 3 * time.Second},
+					{Start: ts, Latency: 1 * time.Second},
+				},
+			},
+		},
+	}
+	for i, tt := range tests {
+		tt.a.merge(tt.b)
+		if !reflect.DeepEqual(tt.a, tt.c) {
+			t.Errorf("case%d: %v != %v", i, tt.a, tt.c)
+		}
+	}
+}
+
+func TestResults(t *testing.T) {
+	ts := time.Now()
+	tests := []struct {
+		list []Result
+		want Results
+	}{
+		// case0
+		{
+			list: nil,
+			want: nil,
+		},
+
+		// case1
+		{
+			list: []Result{
+				{
+					Name: "n1", QPS: 1, Request: 2, Concurrent: 3, Total: 4 * time.Second,
+					Records: []Record{
+						{Start: ts, Latency: 1 * time.Second},
+					},
+				},
+			},
+			want: Results{
+				{
+					Name: "n1", QPS: 1, Request: 2, Concurrent: 3, Total: 4 * time.Second,
+					Records: []Record{
+						{Start: ts, Latency: 1 * time.Second},
+					},
+				},
+			},
+		},
+
+		// case2
+		{
+			list: []Result{
+				{
+					Name: "n1", QPS: 1, Request: 1, Concurrent: 1, Total: 1 * time.Second,
+					Records: []Record{
+						{Start: ts, Latency: 1 * time.Second},
+					},
+				},
+				{
+					Name: "n2", QPS: 2, Request: 2, Concurrent: 2, Total: 2 * time.Second,
+					Records: []Record{
+						{Start: ts, Latency: 2 * time.Second},
+					},
+				},
+			},
+			want: Results{
+				{
+					Name: "n1", QPS: 1, Request: 1, Concurrent: 1, Total: 1 * time.Second,
+					Records: []Record{
+						{Start: ts, Latency: 1 * time.Second},
+					},
+				},
+				{
+					Name: "n2", QPS: 2, Request: 2, Concurrent: 2, Total: 2 * time.Second,
+					Records: []Record{
+						{Start: ts, Latency: 2 * time.Second},
+					},
+				},
+			},
+		},
+
+		// case3
+		{
+			list: []Result{
+				{
+					Name: "n1", QPS: 1, Request: 1, Concurrent: 1, Total: 1 * time.Second,
+					Records: []Record{
+						{Start: ts, Latency: 1 * time.Second},
+					},
+				},
+				{
+					Name: "n1", QPS: 1, Request: 1, Concurrent: 1, Total: 2 * time.Second,
+					Records: []Record{
+						{Start: ts, Latency: 2 * time.Second},
+					},
+				},
+			},
+			want: Results{
+				{
+					Name: "n1", QPS: 2, Request: 2, Concurrent: 2, Total: 2 * time.Second,
+					Records: []Record{
+						{Start: ts, Latency: 1 * time.Second},
+						{Start: ts, Latency: 2 * time.Second},
+					},
+				},
+			},
+		},
+
+		// case4
+		{
+			list: []Result{
+				{
+					Name: "n1", QPS: 1, Request: 1, Concurrent: 1, Total: 1 * time.Second,
+					Records: []Record{
+						{Start: ts, Latency: 1 * time.Second},
+					},
+				},
+				{
+					Name: "n3", QPS: 3, Request: 3, Concurrent: 3, Total: 3 * time.Second,
+					Records: []Record{
+						{Start: ts, Latency: 3 * time.Second},
+					},
+				},
+				{
+					Name: "n1", QPS: 1, Request: 1, Concurrent: 1, Total: 2 * time.Second,
+					Records: []Record{
+						{Start: ts, Latency: 2 * time.Second},
+					},
+				},
+			},
+			want: Results{
+				{
+					Name: "n1", QPS: 2, Request: 2, Concurrent: 2, Total: 2 * time.Second,
+					Records: []Record{
+						{Start: ts, Latency: 1 * time.Second},
+						{Start: ts, Latency: 2 * time.Second},
+					},
+				},
+				{
+					Name: "n3", QPS: 3, Request: 3, Concurrent: 3, Total: 3 * time.Second,
+					Records: []Record{
+						{Start: ts, Latency: 3 * time.Second},
+					},
+				},
+			},
+		},
+	}
+	for i, tt := range tests {
+		var results Results
+		for _, r := range tt.list {
+			results.AddResult(r)
+		}
+		if got, want := results, tt.want; !reflect.DeepEqual(got, want) {
+			t.Errorf("case%d: %v != %v", i, got, want)
+		}
+	}
+}

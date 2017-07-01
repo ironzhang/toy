@@ -36,6 +36,16 @@ type Result struct {
 	Records    []Record
 }
 
+func (r *Result) merge(a Result) {
+	r.QPS += a.QPS
+	r.Request += a.Request
+	r.Concurrent += a.Concurrent
+	if r.Total < a.Total {
+		r.Total = a.Total
+	}
+	r.Records = append(r.Records, a.Records...)
+}
+
 func (r *Result) Stats() Stats {
 	fastest, slowest, average, lats, errs := doStats(r.Records)
 	return Stats{
@@ -87,5 +97,12 @@ func calcQPS(n int, d time.Duration) int {
 
 type Results []Result
 
-func (p Results) AddResult(r Result) {
+func (p *Results) AddResult(a Result) {
+	for i, r := range *p {
+		if r.Name == a.Name {
+			(*p)[i].merge(a)
+			return
+		}
+	}
+	*p = append(*p, a)
 }
