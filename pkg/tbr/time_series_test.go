@@ -67,14 +67,14 @@ func TestMakeTimeSeries(t *testing.T) {
 
 		{
 			records: []Record{
-				{Start: ts, Latency: time.Second},
-				{Start: ts.Add(100 * time.Millisecond), Latency: 2 * time.Second},
-				{Start: ts.Add(200 * time.Millisecond), Latency: 3 * time.Second},
 				{Start: ts.Add(2*time.Second + 100*time.Millisecond), Latency: 4 * time.Second},
 				{Start: ts.Add(2*time.Second + 200*time.Millisecond), Latency: 5 * time.Second},
 				{Start: ts.Add(2*time.Second + 300*time.Millisecond), Latency: 6 * time.Second},
 				{Start: ts.Add(2*time.Second + 400*time.Millisecond), Latency: 7 * time.Second},
 				{Start: ts.Add(2*time.Second + 500*time.Millisecond), Latency: 8 * time.Second},
+				{Start: ts, Latency: time.Second},
+				{Start: ts.Add(100 * time.Millisecond), Latency: 2 * time.Second},
+				{Start: ts.Add(200 * time.Millisecond), Latency: 3 * time.Second},
 			},
 			series: TimeSeries{
 				{Timestamp: ts.Unix(), ThroughPut: 3, MaxLatency: 3 * time.Second, MinLatency: time.Second, AvgLatency: 2 * time.Second},
