@@ -23,7 +23,7 @@ func makeTimeSeries(records []Record) TimeSeries {
 		count int64
 	}
 
-	maxTS := int64(-1)
+	maxTS := int64(math.MinInt64)
 	minTS := int64(math.MaxInt64)
 	points := make(map[int64]point)
 	for _, r := range records {
@@ -45,21 +45,24 @@ func makeTimeSeries(records []Record) TimeSeries {
 		}
 	}
 
-	series := make(TimeSeries, maxTS-minTS+1)
-	for i := minTS; i <= maxTS; i++ {
-		if v, ok := points[i]; ok {
-			series[i-minTS] = DataPoint{
-				Timestamp:  i,
-				ThroughPut: v.count,
-				MaxLatency: v.max,
-				MinLatency: v.min,
-				AvgLatency: v.sum / time.Duration(v.count),
+	if maxTS >= minTS {
+		series := make(TimeSeries, maxTS-minTS+1)
+		for i := minTS; i <= maxTS; i++ {
+			if v, ok := points[i]; ok {
+				series[i-minTS] = DataPoint{
+					Timestamp:  i,
+					ThroughPut: v.count,
+					MaxLatency: v.max,
+					MinLatency: v.min,
+					AvgLatency: v.sum / time.Duration(v.count),
+				}
+			} else {
+				series[i-minTS] = DataPoint{Timestamp: i}
 			}
-		} else {
-			series[i-minTS] = DataPoint{Timestamp: i}
 		}
+		return series
 	}
-	return series
+	return nil
 }
 
 func maxDuration(a, b time.Duration) time.Duration {
