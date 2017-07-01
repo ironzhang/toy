@@ -16,6 +16,7 @@ func TestDoStats(t *testing.T) {
 		lats    []time.Duration
 		errs    map[string]int
 	}{
+		// case0
 		{
 			records: nil,
 			fastest: 0,
@@ -25,6 +26,7 @@ func TestDoStats(t *testing.T) {
 			errs:    map[string]int{},
 		},
 
+		// case1
 		{
 			records: []Record{
 				{Start: ts, Latency: time.Second},
@@ -38,6 +40,7 @@ func TestDoStats(t *testing.T) {
 			errs: map[string]int{},
 		},
 
+		// case2
 		{
 			records: []Record{
 				{Start: ts, Latency: 1 * time.Second},
@@ -53,6 +56,7 @@ func TestDoStats(t *testing.T) {
 			errs: map[string]int{},
 		},
 
+		// case3
 		{
 			records: []Record{
 				{Err: "error"},
@@ -66,6 +70,7 @@ func TestDoStats(t *testing.T) {
 			},
 		},
 
+		// case4
 		{
 			records: []Record{
 				{Err: "error", Start: ts, Latency: time.Second},
@@ -80,10 +85,11 @@ func TestDoStats(t *testing.T) {
 			},
 		},
 
+		// case5
 		{
 			records: []Record{
-				{Start: ts, Latency: 1 * time.Second},
 				{Start: ts, Latency: 2 * time.Second},
+				{Start: ts, Latency: 1 * time.Second},
 				{Start: ts, Latency: 3 * time.Second},
 				{Err: "error1"},
 				{Err: "error2"},
