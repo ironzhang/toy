@@ -30,9 +30,9 @@ func (r *Result) merge(a Result) {
 	r.Records = append(r.Records, a.Records...)
 }
 
-func (r *Result) Stats() Stats {
+func (r *Result) Stats() *Stats {
 	fastest, slowest, average, lats, errs := doStats(r.Records)
-	return Stats{
+	return &Stats{
 		Name:        r.Name,
 		QPS:         r.QPS,
 		RealQPS:     calcQPS(len(lats), r.Total),
