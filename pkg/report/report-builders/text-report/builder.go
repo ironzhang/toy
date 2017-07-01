@@ -27,11 +27,13 @@ func printStats(w io.Writer, s *report.Stats) {
 	fmt.Fprintf(w, "  Average:\t%s\n", s.Average)
 	fmt.Fprintf(w, "  Concurrent:\t%d\n", s.Concurrent)
 	fmt.Fprintf(w, "  Requests:\t%d/%d\n", s.RealRequest, s.Request)
-	fmt.Fprintf(w, "  Requests/sec:\t%4.4f/%d\n", s.RealQPS, s.QPS)
+	fmt.Fprintf(w, "  Requests/sec:\t%d/%d\n", s.RealQPS, s.QPS)
 	if len(s.Lats) > 0 {
 		printHistogram(w, s)
+		printLatencies(w, s)
 	}
 	if len(s.Errs) > 0 {
+		printErrs(w, s)
 	}
 	fmt.Fprintln(w)
 }
@@ -55,5 +57,12 @@ func printLatencies(w io.Writer, s *report.Stats) {
 	fmt.Fprintf(w, "\nLatency distribution:\n")
 	for i := 0; i < len(pcs); i++ {
 		fmt.Fprintf(w, "  %v%% in %s\n", pcs[i], data[i])
+	}
+}
+
+func printErrs(w io.Writer, s *report.Stats) {
+	fmt.Fprintf(w, "\nError distribution:\n")
+	for err, num := range s.Errs {
+		fmt.Fprintf(w, "  [%d]\t%s\n", num, err)
 	}
 }
