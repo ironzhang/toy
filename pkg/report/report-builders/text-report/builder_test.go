@@ -36,5 +36,5 @@ func TestBuilder(t *testing.T) {
 		Total:      10 * time.Second,
 		Records:    makeTestRecord(10000),
 	}
-	(&Builder{w: os.Stdout}).Build(r)
+	(&Builder{W: os.Stdout}).Build(r)
 }

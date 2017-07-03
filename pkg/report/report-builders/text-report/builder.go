@@ -9,12 +9,12 @@ import (
 )
 
 type Builder struct {
-	w io.Writer
+	W io.Writer
 }
 
 func (b *Builder) Build(rs ...report.Result) error {
 	for _, r := range rs {
-		printStats(b.w, r.Stats())
+		printStats(b.W, r.Stats())
 	}
 	return nil
 }
