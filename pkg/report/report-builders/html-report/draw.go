@@ -18,7 +18,7 @@ func drawHistogram(w io.Writer, buckets []time.Duration, counts []int) error {
 
 	graph := chart.BarChart{
 		Width:  1280,
-		Height: 720,
+		Height: 360,
 		XAxis:  chart.Style{Show: true},
 		Bars:   values,
 	}
@@ -88,7 +88,7 @@ func drawThroughputs(w io.Writer, series report.TimeSeries) error {
 
 	graph := chart.Chart{
 		Width:      1280,
-		Height:     720,
+		Height:     360,
 		Background: chart.Style{Padding: chart.Box{Top: 50}},
 		XAxis: chart.XAxis{
 			Style:          chart.Style{Show: true},
