@@ -22,7 +22,7 @@ func TestMakeTimeSeries(t *testing.T) {
 				{Start: ts, Latency: time.Second},
 			},
 			series: TimeSeries{
-				{Timestamp: ts.Unix(), ThroughPut: 1, MaxLatency: time.Second, MinLatency: time.Second, AvgLatency: time.Second},
+				{Timestamp: ts.Unix(), Throughput: 1, MaxLatency: time.Second, MinLatency: time.Second, AvgLatency: time.Second},
 			},
 		},
 
@@ -33,7 +33,7 @@ func TestMakeTimeSeries(t *testing.T) {
 				{Start: ts, Latency: 3 * time.Second},
 			},
 			series: TimeSeries{
-				{Timestamp: ts.Unix(), ThroughPut: 3, MaxLatency: 3 * time.Second, MinLatency: time.Second, AvgLatency: 2 * time.Second},
+				{Timestamp: ts.Unix(), Throughput: 3, MaxLatency: 3 * time.Second, MinLatency: time.Second, AvgLatency: 2 * time.Second},
 			},
 		},
 
@@ -44,7 +44,7 @@ func TestMakeTimeSeries(t *testing.T) {
 				{Start: ts.Add(200 * time.Millisecond), Latency: 3 * time.Second},
 			},
 			series: TimeSeries{
-				{Timestamp: ts.Unix(), ThroughPut: 3, MaxLatency: 3 * time.Second, MinLatency: time.Second, AvgLatency: 2 * time.Second},
+				{Timestamp: ts.Unix(), Throughput: 3, MaxLatency: 3 * time.Second, MinLatency: time.Second, AvgLatency: 2 * time.Second},
 			},
 		},
 
@@ -60,8 +60,8 @@ func TestMakeTimeSeries(t *testing.T) {
 				{Start: ts.Add(1*time.Second + 500*time.Millisecond), Latency: 8 * time.Second},
 			},
 			series: TimeSeries{
-				{Timestamp: ts.Unix(), ThroughPut: 3, MaxLatency: 3 * time.Second, MinLatency: time.Second, AvgLatency: 2 * time.Second},
-				{Timestamp: ts.Add(1 * time.Second).Unix(), ThroughPut: 5, MaxLatency: 8 * time.Second, MinLatency: 4 * time.Second, AvgLatency: 6 * time.Second},
+				{Timestamp: ts.Unix(), Throughput: 3, MaxLatency: 3 * time.Second, MinLatency: time.Second, AvgLatency: 2 * time.Second},
+				{Timestamp: ts.Add(1 * time.Second).Unix(), Throughput: 5, MaxLatency: 8 * time.Second, MinLatency: 4 * time.Second, AvgLatency: 6 * time.Second},
 			},
 		},
 
@@ -77,9 +77,9 @@ func TestMakeTimeSeries(t *testing.T) {
 				{Start: ts.Add(200 * time.Millisecond), Latency: 3 * time.Second},
 			},
 			series: TimeSeries{
-				{Timestamp: ts.Unix(), ThroughPut: 3, MaxLatency: 3 * time.Second, MinLatency: time.Second, AvgLatency: 2 * time.Second},
-				{Timestamp: ts.Add(1 * time.Second).Unix(), ThroughPut: 0, MaxLatency: 0, MinLatency: 0, AvgLatency: 0},
-				{Timestamp: ts.Add(2 * time.Second).Unix(), ThroughPut: 5, MaxLatency: 8 * time.Second, MinLatency: 4 * time.Second, AvgLatency: 6 * time.Second},
+				{Timestamp: ts.Unix(), Throughput: 3, MaxLatency: 3 * time.Second, MinLatency: time.Second, AvgLatency: 2 * time.Second},
+				{Timestamp: ts.Add(1 * time.Second).Unix(), Throughput: 0, MaxLatency: 0, MinLatency: 0, AvgLatency: 0},
+				{Timestamp: ts.Add(2 * time.Second).Unix(), Throughput: 5, MaxLatency: 8 * time.Second, MinLatency: 4 * time.Second, AvgLatency: 6 * time.Second},
 			},
 		},
 	}

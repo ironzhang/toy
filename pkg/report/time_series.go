@@ -7,7 +7,7 @@ import (
 
 type DataPoint struct {
 	Timestamp  int64
-	ThroughPut int64
+	Throughput int64
 	MaxLatency time.Duration
 	MinLatency time.Duration
 	AvgLatency time.Duration
@@ -51,7 +51,7 @@ func makeTimeSeries(records []Record) TimeSeries {
 			if v, ok := points[i]; ok {
 				series[i-minTS] = DataPoint{
 					Timestamp:  i,
-					ThroughPut: v.count,
+					Throughput: v.count,
 					MaxLatency: v.max,
 					MinLatency: v.min,
 					AvgLatency: v.sum / time.Duration(v.count),
