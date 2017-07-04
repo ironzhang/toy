@@ -78,3 +78,43 @@ func minDuration(a, b time.Duration) time.Duration {
 	}
 	return b
 }
+
+func (s TimeSeries) Aggregation() DataPoint {
+	n := len(s)
+	if n <= 0 {
+		return DataPoint{}
+	} else if n == 1 {
+		return s[0]
+	}
+
+	p := s[0]
+	for i := 1; i < n; i++ {
+		p.Throughput += s[i].Throughput
+		p.AvgLatency += s[i].AvgLatency
+		if s[i].MaxLatency > p.MaxLatency {
+			p.MaxLatency = s[i].MaxLatency
+		}
+		if s[i].MinLatency < p.MinLatency {
+			p.MinLatency = s[i].MinLatency
+		}
+	}
+	p.Throughput /= int64(n)
+	p.AvgLatency /= time.Duration(n)
+	return p
+}
+
+func (s TimeSeries) Sampling(size int) TimeSeries {
+	n := len(s)
+	if n <= size || size <= 0 {
+		return s
+	}
+
+	freq := n / size
+	samples := make(TimeSeries, size)
+	for i := 0; i < size; i++ {
+		start := i * freq
+		end := (i + 1) * freq
+		samples[i] = s[start:end].Aggregation()
+	}
+	return samples
+}

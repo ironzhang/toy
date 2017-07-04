@@ -16,7 +16,8 @@ func MakeRandomRecords(n int) []report.Record {
 	//rand.Seed(ts.Unix())
 	records := make([]report.Record, n)
 	for i := 0; i < n; i++ {
-		records[i].Start = ts.Add(time.Duration(i) * 200 * time.Millisecond)
+		ts = ts.Add(time.Duration(Random(10, 100)) * time.Millisecond)
+		records[i].Start = ts
 		records[i].Latency = time.Duration(Random(1, 1200)) * time.Millisecond
 		if records[i].Latency > 1*time.Second {
 			records[i].Err = "timeout"

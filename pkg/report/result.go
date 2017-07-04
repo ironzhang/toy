@@ -30,7 +30,7 @@ func (r *Result) merge(a Result) {
 	r.Records = append(r.Records, a.Records...)
 }
 
-func (r *Result) Stats() *Stats {
+func (r *Result) Stats(sampleSize int) *Stats {
 	fastest, slowest, average, lats, errs := doStats(r.Records)
 	return &Stats{
 		Name:        r.Name,
@@ -43,7 +43,7 @@ func (r *Result) Stats() *Stats {
 		Fastest:     fastest,
 		Slowest:     slowest,
 		Average:     average,
-		Series:      makeTimeSeries(r.Records),
+		Series:      makeTimeSeries(r.Records).Sampling(sampleSize),
 		Lats:        lats,
 		Errs:        errs,
 	}

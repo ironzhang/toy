@@ -33,15 +33,16 @@ type targ struct {
 }
 
 type Builder struct {
-	Template  string
-	OutputDir string
+	Template   string
+	OutputDir  string
+	SampleSize int
 }
 
 func (b *Builder) Build(rs ...report.Result) (err error) {
 	os.MkdirAll(b.OutputDir, os.ModePerm)
 	args := make([]targ, len(rs))
 	for i, r := range rs {
-		if args[i], err = b.build(r.Stats()); err != nil {
+		if args[i], err = b.build(r.Stats(b.SampleSize)); err != nil {
 			return err
 		}
 	}

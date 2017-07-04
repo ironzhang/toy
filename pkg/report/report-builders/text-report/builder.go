@@ -14,7 +14,7 @@ type Builder struct {
 
 func (b *Builder) Build(rs ...report.Result) error {
 	for _, r := range rs {
-		printStats(b.W, r.Stats())
+		printStats(b.W, r.Stats(0))
 	}
 	return nil
 }
