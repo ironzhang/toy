@@ -14,7 +14,7 @@ type Header struct {
 }
 
 type Block struct {
-	Total   time.Duration
+	Time    time.Time
 	Records []Record
 }
 

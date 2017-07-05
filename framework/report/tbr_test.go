@@ -43,6 +43,7 @@ func (p *TData) Decode(dec Decoder) (err error) {
 }
 
 func TestGobCodec(t *testing.T) {
+	ts := time.Now()
 	var a = TData{
 		header: Header{
 			Name:       "TestGobCodec",
@@ -51,8 +52,8 @@ func TestGobCodec(t *testing.T) {
 			Concurrent: 10,
 		},
 		blocks: []Block{
-			{Total: 100 * time.Second, Records: MakeRandomRecords(10)},
-			{Total: 120 * time.Second, Records: MakeRandomRecords(20)},
+			{Time: ts.Add(100 * time.Second), Records: MakeRandomRecords(10)},
+			{Time: ts.Add(120 * time.Second), Records: MakeRandomRecords(20)},
 		},
 	}
 	var b TData
