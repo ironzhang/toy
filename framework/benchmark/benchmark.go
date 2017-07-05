@@ -1,8 +1,9 @@
-package work
+package benchmark
 
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"strings"
@@ -10,7 +11,6 @@ import (
 
 	"github.com/ironzhang/toy/framework/report"
 	"github.com/ironzhang/toy/framework/robot"
-	"github.com/ironzhang/toy/framework/schedule"
 )
 
 const maxRecordNumPerResult = 1000
@@ -19,7 +19,8 @@ type Benchmark struct {
 	Ask        bool
 	Verbose    int
 	Robots     []robot.Robot
-	Schedulers []schedule.Scheduler
+	Schedulers []Scheduler
+	Encoder    report.Encoder
 }
 
 func (w *Benchmark) Run() {
@@ -30,7 +31,7 @@ func (w *Benchmark) Run() {
 	}
 }
 
-func (w *Benchmark) schedule(s *schedule.Scheduler) {
+func (w *Benchmark) schedule(s *Scheduler) {
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
 		c := make(chan os.Signal, 1)
@@ -46,7 +47,9 @@ func (w *Benchmark) schedule(s *schedule.Scheduler) {
 	w.runRobots(ctx, s)
 }
 
-func (w *Benchmark) runRobots(ctx context.Context, s *schedule.Scheduler) {
+func (w *Benchmark) runRobots(ctx context.Context, s *Scheduler) {
+	w.writeHeader(s)
+
 	done := 0
 	prev := time.Now()
 	records := make([]report.Record, 0, maxRecordNumPerResult)
@@ -62,15 +65,40 @@ func (w *Benchmark) runRobots(ctx context.Context, s *schedule.Scheduler) {
 
 		records = append(records, rec)
 		if len(records) >= maxRecordNumPerResult {
-			w.writeRecords(start, records)
-
+			w.writeBlock(time.Since(start), records)
 			start = time.Now()
 			records = records[:0]
 		}
 	}
+	if len(records) > 0 {
+		w.writeBlock(time.Since(start), records)
+	}
 }
 
-func (w *Benchmark) writeRecords(start time.Time, records []report.Record) {
+func (w *Benchmark) writeHeader(s *Scheduler) {
+	if w.Encoder != nil {
+		header := &report.Header{
+			Name:       s.Name,
+			QPS:        s.QPS,
+			Request:    s.N,
+			Concurrent: s.C,
+		}
+		if err := w.Encoder.EncodeHeader(header); err != nil {
+			log.Printf("encode header: %v", err)
+		}
+	}
+}
+
+func (w *Benchmark) writeBlock(total time.Duration, records []report.Record) {
+	if w.Encoder != nil {
+		block := &report.Block{
+			Total:   total,
+			Records: records,
+		}
+		if err := w.Encoder.EncodeBlock(block); err != nil {
+			log.Printf("encode block: %v", err)
+		}
+	}
 }
 
 func ask(name string) bool {

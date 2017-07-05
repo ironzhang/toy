@@ -1,4 +1,4 @@
-package work
+package benchmark
 
 import (
 	"fmt"
@@ -33,49 +33,40 @@ func (r *WorkRobot) Do(name string) error {
 	return nil
 }
 
-func TestWork(t *testing.T) {
+func TestBenchmark(t *testing.T) {
 	n := 100
 	robots := make([]robot.Robot, 0, n)
 	for i := 0; i < n; i++ {
 		robots = append(robots, &WorkRobot{})
 	}
 
-	w := Work{
+	w := Benchmark{
 		Ask:    false,
 		Robots: robots,
 		Schedulers: []Scheduler{
 			{
-				N:           1,
-				C:           10,
-				QPS:         1000,
-				Name:        "Connect",
-				Display:     false,
-				PrintReport: false,
+				N:    1,
+				C:    10,
+				QPS:  1000,
+				Name: "Connect",
 			},
 			{
-				N:           1,
-				C:           10,
-				QPS:         1000,
-				Name:        "Prepare",
-				Display:     false,
-				PrintReport: false,
+				N:    1,
+				C:    10,
+				QPS:  1000,
+				Name: "Prepare",
 			},
 			{
-				N:      100,
-				C:      100,
-				QPS:    5000,
-				Name:   "Publish",
-				Sample: 100,
-				//Display:     true,
-				//PrintReport: true,
+				N:    100,
+				C:    100,
+				QPS:  5000,
+				Name: "Publish",
 			},
 			{
-				N:           1,
-				C:           10,
-				QPS:         1000,
-				Name:        "Disconnect",
-				Display:     false,
-				PrintReport: false,
+				N:    1,
+				C:    10,
+				QPS:  1000,
+				Name: "Disconnect",
 			},
 		},
 	}
