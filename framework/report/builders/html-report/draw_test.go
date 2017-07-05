@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ironzhang/toy/pkg/report"
-	"github.com/ironzhang/toy/pkg/report/report-builders/tests"
+	"github.com/ironzhang/toy/framework/report"
+	"github.com/ironzhang/toy/framework/report/builders/tests"
 )
 
 func MakeTestHistogram() (buckets []time.Duration, counts []int) {

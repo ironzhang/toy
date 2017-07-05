@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/ironzhang/toy/pkg/report"
+	"github.com/ironzhang/toy/framework/report"
 )
 
 type latpct struct {

@@ -3,7 +3,7 @@ package html_report
 import (
 	"testing"
 
-	"github.com/ironzhang/toy/pkg/report/report-builders/tests"
+	"github.com/ironzhang/toy/framework/report/builders/tests"
 )
 
 func TestBuilder(t *testing.T) {

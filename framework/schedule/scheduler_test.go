@@ -1,4 +1,4 @@
-package scheduler
+package schedule
 
 import (
 	"context"
@@ -31,7 +31,12 @@ func TestSchedulerN(t *testing.T) {
 		N: 1000,
 		C: 10,
 	}
-	e.Run(context.Background(), robots, nil)
+	recordc := e.Run(context.Background(), robots)
+	for r := range recordc {
+		if r.Err != "" {
+			t.Errorf("scheduler run: %v", r.Err)
+		}
+	}
 
 	if int(r1.count) != e.N {
 		t.Errorf("count(%d) != %d", r1.count, e.N)
@@ -62,42 +67,31 @@ func TestSchedulerQPS1(t *testing.T) {
 		C:   2,
 		QPS: 1,
 	}
-	e.Run(context.Background(), robots, nil)
+	recordc := e.Run(context.Background(), robots)
+	for range recordc {
+	}
 }
 
 func TestSchedulerQPS2(t *testing.T) {
 	r := &SchedulerRobot{ok: true}
 	robots := []robot.Robot{r}
 
-	(&Scheduler{
+	ch1 := (&Scheduler{
 		N:   10000,
 		C:   1,
 		QPS: 0,
-		//PrintReport: true,
-	}).Run(context.Background(), robots, nil)
+	}).Run(context.Background(), robots)
+	for range ch1 {
+	}
 
-	(&Scheduler{
+	ch2 := (&Scheduler{
 		N:   10000,
 		C:   1,
 		QPS: 1000000,
 		//PrintReport: true,
-	}).Run(context.Background(), robots, nil)
-}
-
-func TestSchedulerDisplay(t *testing.T) {
-	r1 := &SchedulerRobot{ok: true}
-	robots := []robot.Robot{r1}
-
-	e := Scheduler{
-		N:       -1,
-		C:       2,
-		QPS:     10,
-		Name:    "TestSchedulerDisplay",
-		Display: true,
-		//PrintReport: true,
+	}).Run(context.Background(), robots)
+	for range ch2 {
 	}
-	ctx, _ := context.WithDeadline(context.Background(), time.Now().Add(4*time.Second+300*time.Millisecond))
-	e.Run(ctx, robots, nil)
 }
 
 func TestSchedulerRobotOK(t *testing.T) {
@@ -108,9 +102,10 @@ func TestSchedulerRobotOK(t *testing.T) {
 	e := Scheduler{
 		N: 5,
 		C: 2,
-		//PrintReport: true,
 	}
-	e.Run(context.Background(), robots, nil)
+	recordc := e.Run(context.Background(), robots)
+	for range recordc {
+	}
 
 	if r1.count != 5 {
 		t.Errorf("c1(%d) != 3", r1.count)

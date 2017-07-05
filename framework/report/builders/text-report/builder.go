@@ -5,7 +5,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/ironzhang/toy/pkg/report"
+	"github.com/ironzhang/toy/framework/report"
 )
 
 type Builder struct {

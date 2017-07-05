@@ -4,7 +4,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/ironzhang/toy/pkg/report"
+	"github.com/ironzhang/toy/framework/report"
 )
 
 func Random(min, max int) int {

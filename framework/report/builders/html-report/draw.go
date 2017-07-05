@@ -5,7 +5,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/ironzhang/toy/pkg/report"
+	"github.com/ironzhang/toy/framework/report"
 	"github.com/wcharczuk/go-chart"
 )
 
