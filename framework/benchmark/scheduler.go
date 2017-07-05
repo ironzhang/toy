@@ -27,6 +27,7 @@ func (t *task) execute() report.Record {
 	return report.Record{Err: errorstr(e), Start: s.UTC(), Latency: time.Since(s)}
 }
 
+// Scheduler 调度器
 type Scheduler struct {
 	Name string
 	N    int

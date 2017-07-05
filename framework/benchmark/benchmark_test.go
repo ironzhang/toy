@@ -2,9 +2,11 @@ package benchmark
 
 import (
 	"fmt"
+	"os"
 	"sync/atomic"
 	"testing"
 
+	"github.com/ironzhang/toy/framework/report"
 	"github.com/ironzhang/toy/framework/robot"
 )
 
@@ -40,9 +42,18 @@ func TestBenchmark(t *testing.T) {
 		robots = append(robots, &WorkRobot{})
 	}
 
+	filename := "benchmark.tbr"
+	f, err := os.Create(filename)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+
 	w := Benchmark{
-		Ask:    false,
-		Robots: robots,
+		Ask:     false,
+		Verbose: 1,
+		Encoder: report.NewGobEncoder(f),
+		Robots:  robots,
 		Schedulers: []Scheduler{
 			{
 				N:    1,
@@ -87,6 +98,8 @@ func TestBenchmark(t *testing.T) {
 			t.Errorf("DisconnectCount: %d != 1", wr.DisconnectCount)
 		}
 	}
+
+	os.Remove(filename)
 }
 
 func ExampleAsk() {

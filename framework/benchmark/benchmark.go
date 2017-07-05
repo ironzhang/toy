@@ -10,17 +10,19 @@ import (
 	"time"
 
 	"github.com/ironzhang/toy/framework/report"
+	"github.com/ironzhang/toy/framework/report/builders/text-report"
 	"github.com/ironzhang/toy/framework/robot"
 )
 
-const maxRecordNumPerResult = 1000
+const maxRecordNumPerResult = 5000
 
+// Benchmark 性能测试
 type Benchmark struct {
 	Ask        bool
 	Verbose    int
+	Encoder    report.Encoder
 	Robots     []robot.Robot
 	Schedulers []Scheduler
-	Encoder    report.Encoder
 }
 
 func (w *Benchmark) Run() {
@@ -44,10 +46,10 @@ func (w *Benchmark) schedule(s *Scheduler) {
 		return
 	}
 
-	w.runRobots(ctx, s)
+	w.benchmark(ctx, s)
 }
 
-func (w *Benchmark) runRobots(ctx context.Context, s *Scheduler) {
+func (w *Benchmark) benchmark(ctx context.Context, s *Scheduler) {
 	w.writeHeader(s)
 
 	done := 0
@@ -65,13 +67,22 @@ func (w *Benchmark) runRobots(ctx context.Context, s *Scheduler) {
 
 		records = append(records, rec)
 		if len(records) >= maxRecordNumPerResult {
-			w.writeBlock(time.Since(start), records)
+			elapse := time.Since(start)
+			w.writeBlock(elapse, records)
+			if w.Verbose >= 1 {
+				w.printResult(s, elapse, records)
+			}
+
 			start = time.Now()
 			records = records[:0]
 		}
 	}
 	if len(records) > 0 {
-		w.writeBlock(time.Since(start), records)
+		elapse := time.Since(start)
+		w.writeBlock(elapse, records)
+		if w.Verbose >= 1 {
+			w.printResult(s, elapse, records)
+		}
 	}
 }
 
@@ -80,7 +91,7 @@ func (w *Benchmark) writeHeader(s *Scheduler) {
 		header := &report.Header{
 			Name:       s.Name,
 			QPS:        s.QPS,
-			Request:    s.N,
+			Request:    s.N * len(w.Robots),
 			Concurrent: s.C,
 		}
 		if err := w.Encoder.EncodeHeader(header); err != nil {
@@ -99,6 +110,19 @@ func (w *Benchmark) writeBlock(total time.Duration, records []report.Record) {
 			log.Printf("encode block: %v", err)
 		}
 	}
+}
+
+func (w *Benchmark) printResult(s *Scheduler, total time.Duration, records []report.Record) {
+	result := report.Result{
+		Name:       s.Name,
+		QPS:        s.QPS,
+		Request:    s.N * len(w.Robots),
+		Concurrent: s.C,
+		Total:      total,
+		Records:    records,
+	}
+	b := text_report.Builder{W: os.Stdout}
+	b.Build(result)
 }
 
 func ask(name string) bool {
