@@ -2,7 +2,7 @@ package report
 
 import (
 	"bytes"
-	"encoding/json"
+	"encoding/gob"
 	"fmt"
 	"io"
 	"time"
@@ -44,11 +44,11 @@ type Decoder interface {
 }
 
 func NewEncoder(w io.Writer) Encoder {
-	return &gobEncoder{enc: json.NewEncoder(w)}
+	return &gobEncoder{enc: gob.NewEncoder(w)}
 }
 
 type gobEncoder struct {
-	enc *json.Encoder
+	enc *gob.Encoder
 }
 
 func (p *gobEncoder) EncodeHeader(h *Header) error {
@@ -60,11 +60,11 @@ func (p *gobEncoder) EncodeBlock(b *Block) error {
 }
 
 func NewDecoder(r io.Reader) Decoder {
-	return &gobDecoder{dec: json.NewDecoder(r)}
+	return &gobDecoder{dec: gob.NewDecoder(r)}
 }
 
 type gobDecoder struct {
-	dec *json.Decoder
+	dec *gob.Decoder
 }
 
 func (p *gobDecoder) DecodeHeader(h *Header) error {

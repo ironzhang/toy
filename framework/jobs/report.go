@@ -74,7 +74,6 @@ func loadResult(dec report.Decoder) (report.Result, error) {
 	var (
 		err     error
 		header  report.Header
-		block   report.Block
 		last    time.Time
 		total   time.Duration
 		records []report.Record
@@ -84,8 +83,8 @@ func loadResult(dec report.Decoder) (report.Result, error) {
 		return report.Result{}, err
 	}
 	for {
+		var block report.Block // block变量必须在for循环内
 		if err = dec.DecodeBlock(&block); err != nil {
-			fmt.Println(err)
 			return report.Result{}, err
 		}
 		if block.Time.IsZero() {

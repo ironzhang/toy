@@ -99,7 +99,7 @@ func TestBenchmark(t *testing.T) {
 		}
 	}
 
-	//os.Remove(filename)
+	os.Remove(filename)
 }
 
 func ExampleAsk() {
