@@ -49,7 +49,7 @@ func TestBenchmark(t *testing.T) {
 	}
 	defer f.Close()
 
-	w := Benchmark{
+	b := Benchmark{
 		Ask:     false,
 		Verbose: 1,
 		Encoder: report.NewGobEncoder(f),
@@ -81,7 +81,7 @@ func TestBenchmark(t *testing.T) {
 			},
 		},
 	}
-	w.Run()
+	b.Run()
 
 	for _, r := range robots {
 		wr := r.(*WorkRobot)

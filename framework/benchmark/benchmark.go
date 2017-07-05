@@ -14,7 +14,7 @@ import (
 	"github.com/ironzhang/toy/framework/robot"
 )
 
-const maxRecordNumPerResult = 5000
+const MaxRecordNumPerBlock = 5000
 
 // Benchmark 性能测试
 type Benchmark struct {
@@ -25,15 +25,15 @@ type Benchmark struct {
 	Schedulers []Scheduler
 }
 
-func (w *Benchmark) Run() {
-	for _, s := range w.Schedulers {
+func (b *Benchmark) Run() {
+	for _, s := range b.Schedulers {
 		if s.N != 0 {
-			w.schedule(&s)
+			b.schedule(&s)
 		}
 	}
 }
 
-func (w *Benchmark) schedule(s *Scheduler) {
+func (b *Benchmark) schedule(s *Scheduler) {
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
 		c := make(chan os.Signal, 1)
@@ -42,35 +42,35 @@ func (w *Benchmark) schedule(s *Scheduler) {
 		cancel()
 	}()
 
-	if w.Ask && !ask(s.Name) {
+	if b.Ask && !ask(s.Name) {
 		return
 	}
 
-	w.benchmark(ctx, s)
+	b.benchmark(ctx, s)
 }
 
-func (w *Benchmark) benchmark(ctx context.Context, s *Scheduler) {
-	w.writeHeader(s)
+func (b *Benchmark) benchmark(ctx context.Context, s *Scheduler) {
+	b.writeHeader(s)
 
 	done := 0
 	prev := time.Now()
-	records := make([]report.Record, 0, maxRecordNumPerResult)
+	records := make([]report.Record, 0, MaxRecordNumPerBlock)
 
 	start := time.Now()
-	recordc := s.Run(ctx, w.Robots)
+	recordc := s.Run(ctx, b.Robots)
 	for rec := range recordc {
 		done++
-		if w.Verbose >= 2 && time.Since(prev) >= 500*time.Millisecond {
+		if b.Verbose >= 2 && time.Since(prev) >= 500*time.Millisecond {
 			prev = time.Now()
 			fmt.Fprintf(os.Stdout, "%s: %d requests done.\n", s.Name, done)
 		}
 
 		records = append(records, rec)
-		if len(records) >= maxRecordNumPerResult {
+		if len(records) >= MaxRecordNumPerBlock {
 			elapse := time.Since(start)
-			w.writeBlock(elapse, records)
-			if w.Verbose >= 1 {
-				w.printResult(s, elapse, records)
+			b.writeBlock(elapse, records)
+			if b.Verbose >= 1 {
+				b.printResult(s, elapse, records)
 			}
 
 			start = time.Now()
@@ -79,50 +79,49 @@ func (w *Benchmark) benchmark(ctx context.Context, s *Scheduler) {
 	}
 	if len(records) > 0 {
 		elapse := time.Since(start)
-		w.writeBlock(elapse, records)
-		if w.Verbose >= 1 {
-			w.printResult(s, elapse, records)
+		b.writeBlock(elapse, records)
+		if b.Verbose >= 1 {
+			b.printResult(s, elapse, records)
 		}
 	}
 }
 
-func (w *Benchmark) writeHeader(s *Scheduler) {
-	if w.Encoder != nil {
+func (b *Benchmark) writeHeader(s *Scheduler) {
+	if b.Encoder != nil {
 		header := &report.Header{
 			Name:       s.Name,
 			QPS:        s.QPS,
-			Request:    s.N * len(w.Robots),
+			Request:    s.N * len(b.Robots),
 			Concurrent: s.C,
 		}
-		if err := w.Encoder.EncodeHeader(header); err != nil {
+		if err := b.Encoder.EncodeHeader(header); err != nil {
 			log.Printf("encode header: %v", err)
 		}
 	}
 }
 
-func (w *Benchmark) writeBlock(total time.Duration, records []report.Record) {
-	if w.Encoder != nil {
+func (b *Benchmark) writeBlock(total time.Duration, records []report.Record) {
+	if b.Encoder != nil {
 		block := &report.Block{
 			Total:   total,
 			Records: records,
 		}
-		if err := w.Encoder.EncodeBlock(block); err != nil {
+		if err := b.Encoder.EncodeBlock(block); err != nil {
 			log.Printf("encode block: %v", err)
 		}
 	}
 }
 
-func (w *Benchmark) printResult(s *Scheduler, total time.Duration, records []report.Record) {
+func (b *Benchmark) printResult(s *Scheduler, total time.Duration, records []report.Record) {
 	result := report.Result{
 		Name:       s.Name,
 		QPS:        s.QPS,
-		Request:    s.N * len(w.Robots),
+		Request:    s.N * len(b.Robots),
 		Concurrent: s.C,
 		Total:      total,
 		Records:    records,
 	}
-	b := text_report.Builder{W: os.Stdout}
-	b.Build(result)
+	(&text_report.Builder{W: os.Stdout}).Build(result)
 }
 
 func ask(name string) bool {
