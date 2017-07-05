@@ -1,21 +1,36 @@
 package report
 
 import (
-	"encoding/gob"
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"io"
 	"time"
 )
 
 type Header struct {
+	Time       time.Time
 	Name       string
 	QPS        int
 	Request    int
 	Concurrent int
 }
 
+func (h *Header) String() string {
+	var buf bytes.Buffer
+	fmt.Fprintf(&buf, "Time:%s, Name:%s, QPS:%d, Request:%d, Concurrent:%d", h.Time, h.Name, h.QPS, h.Request, h.Concurrent)
+	return buf.String()
+}
+
 type Block struct {
 	Time    time.Time
 	Records []Record
+}
+
+func (b *Block) String() string {
+	var buf bytes.Buffer
+	fmt.Fprintf(&buf, "Time:%s, Records:%v", b.Time, b.Records)
+	return buf.String()
 }
 
 type Encoder interface {
@@ -28,12 +43,12 @@ type Decoder interface {
 	DecodeBlock(b *Block) error
 }
 
-type gobEncoder struct {
-	enc *gob.Encoder
+func NewEncoder(w io.Writer) Encoder {
+	return &gobEncoder{enc: json.NewEncoder(w)}
 }
 
-func NewGobEncoder(w io.Writer) Encoder {
-	return &gobEncoder{enc: gob.NewEncoder(w)}
+type gobEncoder struct {
+	enc *json.Encoder
 }
 
 func (p *gobEncoder) EncodeHeader(h *Header) error {
@@ -44,12 +59,12 @@ func (p *gobEncoder) EncodeBlock(b *Block) error {
 	return p.enc.Encode(b)
 }
 
-type gobDecoder struct {
-	dec *gob.Decoder
+func NewDecoder(r io.Reader) Decoder {
+	return &gobDecoder{dec: json.NewDecoder(r)}
 }
 
-func NewGobDecoder(r io.Reader) Decoder {
-	return &gobDecoder{dec: gob.NewDecoder(r)}
+type gobDecoder struct {
+	dec *json.Decoder
 }
 
 func (p *gobDecoder) DecodeHeader(h *Header) error {

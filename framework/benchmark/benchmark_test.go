@@ -52,7 +52,7 @@ func TestBenchmark(t *testing.T) {
 	b := Benchmark{
 		Ask:     false,
 		Verbose: 0,
-		Encoder: report.NewGobEncoder(f),
+		Encoder: report.NewEncoder(f),
 		Robots:  robots,
 		Schedulers: []Scheduler{
 			{
@@ -99,7 +99,7 @@ func TestBenchmark(t *testing.T) {
 		}
 	}
 
-	os.Remove(filename)
+	//os.Remove(filename)
 }
 
 func ExampleAsk() {

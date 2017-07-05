@@ -50,13 +50,11 @@ func (b *Benchmark) schedule(s *Scheduler) {
 }
 
 func (b *Benchmark) benchmark(ctx context.Context, s *Scheduler) {
-	b.writeHeader(s)
+	b.writeHeader(time.Now(), s)
 
 	done := 0
-	prev := time.Now()
+	last, prev := time.Now(), time.Now()
 	records := make([]report.Record, 0, MaxRecordNumPerBlock)
-
-	start := time.Now()
 	recordc := s.Run(ctx, b.Robots)
 	for rec := range recordc {
 		done++
@@ -67,27 +65,24 @@ func (b *Benchmark) benchmark(ctx context.Context, s *Scheduler) {
 
 		records = append(records, rec)
 		if len(records) >= MaxRecordNumPerBlock {
-			elapse := time.Since(start)
-			b.writeBlock(elapse, records)
+			b.writeBlock(time.Now(), records)
 			if b.Verbose >= 1 {
-				b.printResult(s, elapse, records)
+				b.printResult(s, time.Since(last), records)
 			}
-
-			start = time.Now()
+			last = time.Now()
 			records = records[:0]
 		}
 	}
 	if len(records) > 0 {
-		elapse := time.Since(start)
-		b.writeBlock(elapse, records)
+		b.writeBlock(time.Now(), records)
 		if b.Verbose >= 1 {
-			b.printResult(s, elapse, records)
+			b.printResult(s, time.Since(last), records)
 		}
 	}
-	b.writeBlock(-1, nil) // end of result
+	b.writeBlock(time.Time{}, nil) // end of result
 }
 
-func (b *Benchmark) writeHeader(s *Scheduler) {
+func (b *Benchmark) writeHeader(ts time.Time, s *Scheduler) {
 	n := s.N
 	if n > 0 {
 		n *= len(b.Robots)
@@ -95,6 +90,7 @@ func (b *Benchmark) writeHeader(s *Scheduler) {
 
 	if b.Encoder != nil {
 		header := &report.Header{
+			Time:       ts,
 			Name:       s.Name,
 			QPS:        s.QPS,
 			Request:    n,
@@ -106,10 +102,10 @@ func (b *Benchmark) writeHeader(s *Scheduler) {
 	}
 }
 
-func (b *Benchmark) writeBlock(total time.Duration, records []report.Record) {
+func (b *Benchmark) writeBlock(ts time.Time, records []report.Record) {
 	if b.Encoder != nil {
 		block := &report.Block{
-			Total:   total,
+			Time:    ts,
 			Records: records,
 		}
 		if err := b.Encoder.EncodeBlock(block); err != nil {

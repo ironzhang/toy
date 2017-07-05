@@ -1,6 +1,5 @@
 toy
 *.so
-*.rd
-*.gob
+*.tbr
 *.png
 *.html

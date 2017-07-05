@@ -2,6 +2,7 @@ package report
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"reflect"
 	"testing"
@@ -29,8 +30,8 @@ func (p *TData) Decode(dec Decoder) (err error) {
 	if err = dec.DecodeHeader(&p.header); err != nil {
 		return err
 	}
-	var b Block
 	for {
+		var b Block
 		if err = dec.DecodeBlock(&b); err != nil {
 			if err == io.EOF {
 				break
@@ -40,6 +41,15 @@ func (p *TData) Decode(dec Decoder) (err error) {
 		p.blocks = append(p.blocks, b)
 	}
 	return nil
+}
+
+func (p *TData) String() string {
+	var buf bytes.Buffer
+	fmt.Fprintf(&buf, "Header: %s\n", p.header.String())
+	for i, b := range p.blocks {
+		fmt.Fprintf(&buf, "Block[%d]: %s\n", i, b.String())
+	}
+	return buf.String()
 }
 
 func TestGobCodec(t *testing.T) {
@@ -52,16 +62,16 @@ func TestGobCodec(t *testing.T) {
 			Concurrent: 10,
 		},
 		blocks: []Block{
-			{Time: ts.Add(100 * time.Second), Records: MakeRandomRecords(10)},
-			{Time: ts.Add(120 * time.Second), Records: MakeRandomRecords(20)},
+			{Time: ts.Add(100 * time.Second), Records: MakeRandomRecords(1)},
+			{Time: ts.Add(120 * time.Second), Records: MakeRandomRecords(10)},
 		},
 	}
 	var b TData
 
 	var err error
 	var buf bytes.Buffer
-	enc := NewGobEncoder(&buf)
-	dec := NewGobDecoder(&buf)
+	enc := NewEncoder(&buf)
+	dec := NewDecoder(&buf)
 	if err = a.Encode(enc); err != nil {
 		t.Fatalf("encode: %v", err)
 	}
@@ -69,6 +79,6 @@ func TestGobCodec(t *testing.T) {
 		t.Fatalf("decode: %v", err)
 	}
 	if !reflect.DeepEqual(a, b) {
-		t.Errorf("%v != %v", a, b)
+		t.Errorf("%s != %s", a.String(), b.String())
 	}
 }
