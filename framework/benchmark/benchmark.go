@@ -87,11 +87,16 @@ func (b *Benchmark) benchmark(ctx context.Context, s *Scheduler) {
 }
 
 func (b *Benchmark) writeHeader(s *Scheduler) {
+	n := s.N
+	if n > 0 {
+		n *= len(b.Robots)
+	}
+
 	if b.Encoder != nil {
 		header := &report.Header{
 			Name:       s.Name,
 			QPS:        s.QPS,
-			Request:    s.N * len(b.Robots),
+			Request:    n,
 			Concurrent: s.C,
 		}
 		if err := b.Encoder.EncodeHeader(header); err != nil {
@@ -113,10 +118,15 @@ func (b *Benchmark) writeBlock(total time.Duration, records []report.Record) {
 }
 
 func (b *Benchmark) printResult(s *Scheduler, total time.Duration, records []report.Record) {
+	n := s.N
+	if n > 0 {
+		n *= len(b.Robots)
+	}
+
 	result := report.Result{
 		Name:       s.Name,
 		QPS:        s.QPS,
-		Request:    s.N * len(b.Robots),
+		Request:    n,
 		Concurrent: s.C,
 		Total:      total,
 		Records:    records,
