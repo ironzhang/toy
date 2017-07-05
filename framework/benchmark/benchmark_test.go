@@ -51,7 +51,7 @@ func TestBenchmark(t *testing.T) {
 
 	b := Benchmark{
 		Ask:     false,
-		Verbose: 1,
+		Verbose: 0,
 		Encoder: report.NewGobEncoder(f),
 		Robots:  robots,
 		Schedulers: []Scheduler{

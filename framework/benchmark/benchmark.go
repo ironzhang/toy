@@ -84,6 +84,7 @@ func (b *Benchmark) benchmark(ctx context.Context, s *Scheduler) {
 			b.printResult(s, elapse, records)
 		}
 	}
+	b.writeBlock(-1, nil) // end of result
 }
 
 func (b *Benchmark) writeHeader(s *Scheduler) {
