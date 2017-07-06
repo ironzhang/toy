@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/ironzhang/toy/framework/cmds"
+	"github.com/ironzhang/toy/framework/command"
 )
 
 func usage() {
@@ -36,14 +36,14 @@ func main() {
 }
 
 func RunBenchCmd(args []string) {
-	var cmd cmds.BenchCmd
+	var cmd command.BenchCmd
 	if err := cmd.Run(args); err != nil {
 		fmt.Println(err)
 	}
 }
 
 func RunReportCmd(args []string) {
-	var cmd = cmds.ReportCmd{Template: "./framework/report/builders/html-report/templates/report.template"}
+	var cmd = command.ReportCmd{Template: "./framework/report/builders/html-report/templates/report.template"}
 	if err := cmd.Run(args); err != nil {
 		fmt.Println(err)
 	}
