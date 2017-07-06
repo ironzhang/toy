@@ -19,7 +19,7 @@ func TestBenchCmdParse(t *testing.T) {
 		robotPath: "test-robot",
 	}
 	if err := got.parse(args); err != nil {
-		t.Errorf("cmd parse: %v", err)
+		t.Fatalf("cmd parse: %v", err)
 	}
 	if got != want {
 		t.Errorf("%v != %v", got, want)
