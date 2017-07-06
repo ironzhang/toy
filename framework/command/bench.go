@@ -20,12 +20,11 @@ const (
 )
 
 type BenchCmd struct {
-	verbose    int
-	ask        bool
-	record     bool
-	recordFile string
-	robotNum   int
-	robotPath  string
+	verbose   int
+	ask       bool
+	robotNum  int
+	robotPath string
+	output    string
 }
 
 func (c *BenchCmd) Run(args []string) error {
@@ -41,12 +40,11 @@ func (c *BenchCmd) parse(args []string) error {
 		fmt.Print("Usage: toy bench [OPTIONS]\n\n")
 		fs.PrintDefaults()
 	}
-	fs.IntVar(&c.verbose, "verbose", 1, "verbose level")
+	fs.IntVar(&c.verbose, "verbose", 0, "verbose level")
 	fs.BoolVar(&c.ask, "ask", false, "ask execute scheduler")
-	fs.BoolVar(&c.record, "record", false, "record the result")
-	fs.StringVar(&c.recordFile, "record-file", "", "record file")
 	fs.IntVar(&c.robotNum, "robot-num", 1, "robot num")
 	fs.StringVar(&c.robotPath, "robot-path", "./robots/test-robot", "robot path")
+	fs.StringVar(&c.output, "output", "", "the record file")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -63,18 +61,16 @@ func (c *BenchCmd) execute() error {
 		return err
 	}
 
-	var encoder report.Encoder
-	if c.record {
-		if c.recordFile == "" {
-			c.recordFile = fmt.Sprintf("record.%s.tbr", time.Now().Format(time.RFC3339))
-		}
-		f, err := os.Create(c.recordFile)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-		encoder = report.NewEncoder(f)
+	filename := c.output
+	if filename == "" {
+		filename = fmt.Sprintf("record.%s.tbr", time.Now().Format(time.RFC3339))
 	}
+	f, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	encoder := report.NewEncoder(f)
 
 	(&benchmark.Benchmark{
 		Verbose:    c.verbose,
