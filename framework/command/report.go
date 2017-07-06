@@ -35,13 +35,21 @@ func (c *ReportCmd) Run(args []string) error {
 
 func (c *ReportCmd) parse(args []string) error {
 	var fs flag.FlagSet
-	fs.StringVar(&c.format, "format", "html", "report format")
+	fs.Usage = func() {
+		fmt.Print("Usage: toy report [OPTIONS] FILE [FILE...]\n\n")
+		fs.PrintDefaults()
+	}
+	fs.StringVar(&c.format, "format", "html", "report format, html/text")
 	fs.StringVar(&c.outputDir, "output-dir", "output", "output dir")
 	fs.IntVar(&c.sampleSize, "sample-size", 500, "sample size")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
 	c.resultFiles = fs.Args()
+	if len(c.resultFiles) <= 0 {
+		fs.Usage()
+		os.Exit(1)
+	}
 	return nil
 }
 

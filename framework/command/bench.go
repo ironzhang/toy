@@ -37,6 +37,10 @@ func (c *BenchCmd) Run(args []string) error {
 
 func (c *BenchCmd) parse(args []string) error {
 	var fs flag.FlagSet
+	fs.Usage = func() {
+		fmt.Print("Usage: toy bench [OPTIONS]\n\n")
+		fs.PrintDefaults()
+	}
 	fs.IntVar(&c.verbose, "verbose", 1, "verbose level")
 	fs.BoolVar(&c.ask, "ask", false, "ask execute scheduler")
 	fs.BoolVar(&c.record, "record", false, "record the result")
