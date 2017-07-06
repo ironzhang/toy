@@ -18,8 +18,8 @@ const MaxRecordNumPerBlock = 5000
 
 // Benchmark 性能测试
 type Benchmark struct {
-	Ask        bool
 	Verbose    int
+	Ask        bool
 	Encoder    report.Encoder
 	Robots     []robot.Robot
 	Schedulers []Scheduler
