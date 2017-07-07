@@ -13,6 +13,17 @@ toy是一个简单的性能测试工具，通过加载不同的机器人插件�
 go get -u github.com/ironzhang/toy
 ```
 
+## Quick start
+
+```
+go get -u github.com/ironzhang/toy
+cd $GOPATH/src/github.com/ironzhang/toy/
+go build
+cd ./robots/test-robot/; ./build.sh; cd ../..
+./toy bench -robot-path ./robots/test-robot -robot-num 1000 -output test.tbr
+./toy report -format text test.tbr
+```
+
 ## Usage
 
 ```
