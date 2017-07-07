@@ -37,6 +37,7 @@ func (c *ReportCmd) parse(args []string) error {
 	var fs flag.FlagSet
 	fs.Usage = func() {
 		fmt.Print("Usage: toy report [OPTIONS] FILE [FILE...]\n\n")
+		fmt.Print("make benchmark report with test records\n\n")
 		fs.PrintDefaults()
 	}
 	fs.StringVar(&c.format, "format", "html", "report format, html/text")

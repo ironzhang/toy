@@ -10,9 +10,11 @@ import (
 func usage() {
 	fmt.Println("Usage: toy COMMAND [arg...]")
 	fmt.Println()
+	fmt.Println("A extensible benchmark tool")
+	fmt.Println()
 	fmt.Println("Commands:")
-	fmt.Println("    bench")
-	fmt.Println("    report")
+	fmt.Println("    bench\tdo benchmark test")
+	fmt.Println("    report\tmake benchmark report")
 	fmt.Println()
 	fmt.Println("run 'toy COMMAND --help' for more information on a command")
 }

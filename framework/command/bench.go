@@ -38,6 +38,7 @@ func (c *BenchCmd) parse(args []string) error {
 	var fs flag.FlagSet
 	fs.Usage = func() {
 		fmt.Print("Usage: toy bench [OPTIONS]\n\n")
+		fmt.Print("start robots to do benchmark test\n\n")
 		fs.PrintDefaults()
 	}
 	fs.IntVar(&c.verbose, "verbose", 0, "verbose level")
