@@ -74,7 +74,7 @@ cd ./robots/test-robot/; ./build.sh; cd ../..
 
 toy要求加载的机器人插件实现robot.Robot接口
 
-```
+```go
 // Robot 机器人接口
 type Robot interface {
         OK() bool
@@ -86,7 +86,7 @@ type Robot interface {
 
 如下是test-robot的实现
 
-```
+```go
 package main
 
 import (
@@ -136,7 +136,7 @@ go build -buildmode=plugin -o robot.so
 
 在每一个插件目录下必须有一个`schedulers.json`文件来描述机器人的调度配置。如下是test-robot的调度配置。
 
-```
+```json
 [
         {
                 "Name": "Connect",
