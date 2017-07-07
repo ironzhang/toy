@@ -4,42 +4,34 @@ import (
 	"testing"
 
 	"github.com/ironzhang/matrix/jsoncfg"
-	"github.com/ironzhang/toy/framework"
+	"github.com/ironzhang/toy/framework/benchmark"
 )
 
 func TestWriteSchedulersJSON(t *testing.T) {
-	schedulers := []framework.Scheduler{
+	schedulers := []benchmark.Scheduler{
 		{
-			N:           1,
-			C:           10,
-			QPS:         1000,
-			Name:        "Connect",
-			Display:     true,
-			PrintReport: false,
+			Name: "Connect",
+			N:    1,
+			C:    10,
+			QPS:  1000,
 		},
 		{
-			N:           1,
-			C:           10,
-			QPS:         1000,
-			Name:        "Prepare",
-			Display:     true,
-			PrintReport: false,
+			Name: "Prepare",
+			N:    1,
+			C:    10,
+			QPS:  1000,
 		},
 		{
-			N:           100,
-			C:           100,
-			QPS:         5000,
-			Name:        "Publish",
-			Display:     true,
-			PrintReport: true,
+			Name: "Publish",
+			N:    100,
+			C:    10,
+			QPS:  5000,
 		},
 		{
-			N:           1,
-			C:           10,
-			QPS:         1000,
-			Name:        "Disconnect",
-			Display:     true,
-			PrintReport: false,
+			Name: "Disconnect",
+			N:    1,
+			C:    10,
+			QPS:  1000,
 		},
 	}
 	jsoncfg.WriteToFile("./schedulers.json", schedulers)

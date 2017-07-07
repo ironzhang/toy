@@ -3,36 +3,24 @@
 		"Name": "Connect",
 		"N": 1,
 		"C": 10,
-		"QPS": 1000,
-		"Sample": 0,
-		"Display": true,
-		"PrintReport": false
+		"QPS": 1000
 	},
 	{
 		"Name": "Prepare",
 		"N": 1,
 		"C": 10,
-		"QPS": 1000,
-		"Sample": 0,
-		"Display": true,
-		"PrintReport": false
+		"QPS": 1000
 	},
 	{
 		"Name": "Publish",
 		"N": 100,
-		"C": 100,
-		"QPS": 5000,
-		"Sample": 0,
-		"Display": true,
-		"PrintReport": true
+		"C": 10,
+		"QPS": 5000
 	},
 	{
 		"Name": "Disconnect",
 		"N": 1,
 		"C": 10,
-		"QPS": 1000,
-		"Sample": 0,
-		"Display": true,
-		"PrintReport": false
+		"QPS": 1000
 	}
 ]
