@@ -34,6 +34,8 @@ func main() {
 		RunBenchCmd(args[1:])
 	case "report":
 		RunReportCmd(args[1:])
+	default:
+		usage()
 	}
 }
 
