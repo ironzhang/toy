@@ -67,7 +67,7 @@ cd $GOPATH/src/github.com/ironzhang/toy/
 go build
 cd ./robots/test-robot/; ./build.sh; cd ../..
 
-./toy bench -robot-path ./robots/test-robot -robot-num 1000 -output test.tbr
+./toy bench -robot-path ./robots/test-robot -robot-num 100 -output test.tbr
 ./toy report -format text test.tbr
 ```
 
