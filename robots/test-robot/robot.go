@@ -30,6 +30,8 @@ func (r *Robot) Do(name string) error {
 		time.Sleep(20 * time.Millisecond)
 	case "Publish":
 		time.Sleep(100 * time.Microsecond)
+	case "Disconnect":
+		time.Sleep(10 * time.Microsecond)
 	}
 	return nil
 }
