@@ -1,7 +1,0 @@
-{
-	"Addrs": ["localhost:2000", "localhost:2001"],
-	"Verbose": true,
-	"ConnectTimeout": "30s",
-	"ReadWriteTimeout": "30s",
-	"PayloadSize": 50
-}

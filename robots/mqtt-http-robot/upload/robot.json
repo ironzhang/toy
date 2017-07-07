@@ -1,6 +1,0 @@
-{
-	"Addrs": ["http://10.0.0.4:8000"],
-	"Timeout": "10s",
-	"Qos": 1,
-	"PayloadSize": 50
-}
