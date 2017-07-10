@@ -64,9 +64,7 @@ make benchmark report with test records
 ```
 go get -u github.com/ironzhang/toy
 cd $GOPATH/src/github.com/ironzhang/toy/
-go build
-cd ./robots/test-robot/; ./build.sh; cd ../..
-
+./build.sh
 ./toy bench -robot-path ./robots/test-robot -robot-num 100 -output test.tbr
 ./toy report -format text test.tbr
 ```
