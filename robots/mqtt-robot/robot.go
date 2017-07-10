@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -10,7 +11,6 @@ import (
 	"github.com/eclipse/paho.mqtt.golang"
 	"github.com/ironzhang/matrix/jsoncfg"
 	"github.com/ironzhang/toy/framework/robot"
-	"github.com/sirupsen/logrus"
 )
 
 var errTimeout = errors.New("timeout")
@@ -147,7 +147,7 @@ var msgcnt int64
 func (r *Robot) OnMessage(c mqtt.Client, msg mqtt.Message) {
 	n := atomic.AddInt64(&msgcnt, 1)
 	if n%100000 == 0 {
-		logrus.WithField("msgcnt", n).Info("on message")
+		log.Printf("messages: %d", n)
 	}
 }
 
@@ -155,7 +155,6 @@ var lost int64
 
 func (r *Robot) OnConnectionLost(c mqtt.Client, err error) {
 	r.ok = false
-
 	n := atomic.AddInt64(&lost, 1)
-	logrus.WithError(err).WithField("lost", n).Errorf("robot(%s) lost connection", r.id)
+	log.Printf("robot(%s) lost. lost robots: %d", r.id, n)
 }
