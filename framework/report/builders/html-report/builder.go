@@ -50,7 +50,7 @@ func (b *Builder) Build(rs ...report.Result) (err error) {
 }
 
 func (b *Builder) renderHTML(args []targ) error {
-	t, err := template.ParseFiles(b.Template)
+	t, err := template.New("report").Parse(reportTemplate)
 	if err != nil {
 		return err
 	}

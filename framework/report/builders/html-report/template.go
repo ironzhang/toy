@@ -1,3 +1,6 @@
+package html_report
+
+var reportTemplate = `
 <html>
 
 <head>
@@ -53,3 +56,4 @@
 
 </body>
 </html>
+`
