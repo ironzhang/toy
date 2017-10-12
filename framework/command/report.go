@@ -17,8 +17,6 @@ type builder interface {
 }
 
 type ReportCmd struct {
-	Template string
-
 	format     string
 	outputDir  string
 	sampleSize int
@@ -40,7 +38,7 @@ func (c *ReportCmd) parse(args []string) error {
 		fmt.Print("make benchmark report with test records\n\n")
 		fs.PrintDefaults()
 	}
-	fs.StringVar(&c.format, "format", "html", "report format, html/text")
+	fs.StringVar(&c.format, "format", "text", "report format, text/html")
 	fs.StringVar(&c.outputDir, "output-dir", "output", "output dir")
 	fs.IntVar(&c.sampleSize, "sample-size", 500, "sample size")
 	if err := fs.Parse(args); err != nil {
@@ -65,7 +63,7 @@ func (c *ReportCmd) execute() error {
 func (c *ReportCmd) builder() builder {
 	switch c.format {
 	case "html":
-		return &html_report.Builder{Template: c.Template, OutputDir: c.outputDir, SampleSize: c.sampleSize}
+		return &html_report.Builder{OutputDir: c.outputDir, SampleSize: c.sampleSize}
 	default:
 		return &text_report.Builder{W: os.Stdout}
 	}

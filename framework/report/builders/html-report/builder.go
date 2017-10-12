@@ -33,7 +33,6 @@ type targ struct {
 }
 
 type Builder struct {
-	Template   string
 	OutputDir  string
 	SampleSize int
 }

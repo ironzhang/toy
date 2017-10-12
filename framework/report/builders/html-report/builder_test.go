@@ -10,7 +10,6 @@ func TestBuilder(t *testing.T) {
 	r1 := tests.MakeTestResult("Connect")
 	r2 := tests.MakeTestResult("Disconnect")
 	b := Builder{
-		Template:   "./templates/report.template",
 		OutputDir:  "./output",
 		SampleSize: 500,
 	}

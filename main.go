@@ -47,7 +47,7 @@ func RunBenchCmd(args []string) {
 }
 
 func RunReportCmd(args []string) {
-	var cmd = command.ReportCmd{Template: "./framework/report/builders/html-report/templates/report.template"}
+	var cmd command.ReportCmd
 	if err := cmd.Run(args); err != nil {
 		fmt.Println(err)
 	}

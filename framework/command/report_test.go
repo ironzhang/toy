@@ -39,7 +39,6 @@ func TestTextReportCmdExecute(t *testing.T) {
 
 func TestHTMLReportCmdExecute(t *testing.T) {
 	cmd := ReportCmd{
-		Template:    "../report/builders/html-report/templates/report.template",
 		format:      "html",
 		outputDir:   "output",
 		sampleSize:  500,
