@@ -7,8 +7,8 @@ import (
 	"plugin"
 	"time"
 
-	"github.com/ironzhang/matrix/jsoncfg"
 	"github.com/ironzhang/toy/framework/benchmark"
+	"github.com/ironzhang/toy/framework/jsoncfg"
 	"github.com/ironzhang/toy/framework/report"
 	"github.com/ironzhang/toy/framework/robot"
 )

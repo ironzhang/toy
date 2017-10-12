@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/eclipse/paho.mqtt.golang"
-	"github.com/ironzhang/matrix/jsoncfg"
+	"github.com/ironzhang/toy/framework/jsoncfg"
 	"github.com/ironzhang/toy/framework/robot"
 )
 
