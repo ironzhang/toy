@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/ironzhang/toy/framework/report"
-	"github.com/ironzhang/toy/framework/report/builders/html-report"
 	"github.com/ironzhang/toy/framework/report/builders/text-report"
 )
 
@@ -61,12 +60,7 @@ func (c *ReportCmd) execute() error {
 }
 
 func (c *ReportCmd) builder() builder {
-	switch c.format {
-	case "html":
-		return &html_report.Builder{OutputDir: c.outputDir, SampleSize: c.sampleSize}
-	default:
-		return &text_report.Builder{W: os.Stdout}
-	}
+	return &text_report.Builder{W: os.Stdout}
 }
 
 func load(filenames []string) (rs report.Results, err error) {
