@@ -10,6 +10,10 @@ import (
 
 var client coap.Client
 
+func init() {
+	coap.Verbose = 2
+}
+
 func NewRobots(n int, file string) ([]robot.Robot, error) {
 	robots := make([]robot.Robot, 0, n)
 	for i := 1; i <= n; i++ {
