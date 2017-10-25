@@ -1,4 +1,5 @@
 toy
+run.sh
 *.so
 *.tbr
 *.png
