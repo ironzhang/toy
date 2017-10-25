@@ -1,8 +1,26 @@
 [
 	{
-		"Name": "Ping",
+		"Name": "Connect",
 		"N": 1,
-		"C": 50,
+		"C": 100,
+		"QPS": 0
+	},
+	{
+		"Name": "Ping",
+		"N": 1000,
+		"C": 100,
+		"QPS": 0
+	},
+	{
+		"Name": "Disconnect",
+		"N": 1,
+		"C": 100,
+		"QPS": 0
+	},
+	{
+		"Name": "ShortPing",
+		"N": 100,
+		"C": 100,
 		"QPS": 0
 	}
 ]
