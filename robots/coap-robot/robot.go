@@ -14,6 +14,7 @@ var client coap.Client
 
 func init() {
 	coap.Verbose = 0
+	coap.EnableCache = false
 }
 
 func NewRobots(n int, file string) ([]robot.Robot, error) {
@@ -26,19 +27,17 @@ func NewRobots(n int, file string) ([]robot.Robot, error) {
 
 func newRobot(addr string) *Robot {
 	return &Robot{
-		ok:       true,
-		addr:     addr,
-		pingc:    make(chan struct{}, 1),
-		observec: make(chan struct{}, 1),
+		ok:   true,
+		addr: addr,
+		done: make(chan struct{}, 1),
 	}
 }
 
 type Robot struct {
-	ok       bool
-	addr     string
-	conn     *coap.Conn
-	pingc    chan struct{}
-	observec chan struct{}
+	ok   bool
+	addr string
+	done chan struct{}
+	conn *coap.Conn
 }
 
 func (p *Robot) OK() bool {
@@ -53,8 +52,8 @@ func (p *Robot) Do(name string) error {
 		return p.Disconnect()
 	case "Ping":
 		return p.Ping()
-	case "Observe":
-		return p.Observe()
+	case "Echo":
+		return p.Echo()
 	case "Sleep":
 		return p.Sleep()
 	case "ShortPing":
@@ -67,10 +66,8 @@ func (p *Robot) Do(name string) error {
 func (p *Robot) ServeCOAP(w coap.ResponseWriter, r *coap.Request) {
 	//log.Printf("ServeCOAP: %q", r.URL.Path)
 	switch r.URL.Path {
-	case "/ping":
-		p.pingc <- struct{}{}
-	case "/observe":
-		p.observec <- struct{}{}
+	case "/echoFinish":
+		p.done <- struct{}{}
 	}
 }
 
@@ -92,6 +89,7 @@ func (p *Robot) Ping() error {
 	urlstr := fmt.Sprintf("coap://%s/ping", p.addr)
 	req, err := coap.NewRequest(true, coap.POST, urlstr, nil)
 	if err != nil {
+		log.Printf("new request: %v", err)
 		return err
 	}
 	_, err = p.conn.SendRequest(req)
@@ -99,23 +97,14 @@ func (p *Robot) Ping() error {
 		log.Printf("send request: %v", err)
 		return err
 	}
-
-	t := time.NewTimer(10 * time.Second)
-	defer t.Stop()
-	select {
-	case <-p.pingc:
-		return nil
-	case <-t.C:
-		return errors.New("wait ping timeout")
-	}
-
 	return nil
 }
 
-func (p *Robot) Observe() error {
-	urlstr := fmt.Sprintf("coap://%s/observe", p.addr)
+func (p *Robot) Echo() error {
+	urlstr := fmt.Sprintf("coap://%s/echo", p.addr)
 	req, err := coap.NewRequest(true, coap.POST, urlstr, nil)
 	if err != nil {
+		log.Printf("new request: %v", err)
 		return err
 	}
 	_, err = p.conn.SendRequest(req)
@@ -124,15 +113,14 @@ func (p *Robot) Observe() error {
 		return err
 	}
 
-	t := time.NewTimer(10 * time.Second)
+	t := time.NewTimer(5 * time.Second)
 	defer t.Stop()
 	select {
-	case <-p.observec:
+	case <-p.done:
 		return nil
 	case <-t.C:
-		return errors.New("wait observe timeout")
+		return errors.New("wait echo finish timeout")
 	}
-
 	return nil
 }
 
@@ -145,6 +133,7 @@ func (p *Robot) ShortPing() error {
 	urlstr := fmt.Sprintf("coap://%s/short/ping", p.addr)
 	req, err := coap.NewRequest(true, coap.POST, urlstr, nil)
 	if err != nil {
+		log.Printf("new request: %v", err)
 		return err
 	}
 	_, err = client.SendRequest(req)

@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestRobot(t *testing.T) {
+func TestShortPing(t *testing.T) {
 	n := 1000
 	for i := 0; i < n; i++ {
 		r := newRobot("localhost:5683")
@@ -45,9 +45,9 @@ func TestPing(t *testing.T) {
 	wg.Wait()
 }
 
-func TestObserve(t *testing.T) {
+func TestEcho(t *testing.T) {
 	n := 100
-	tasks := []string{"Connect", "Observe", "Sleep", "Disconnect"}
+	tasks := []string{"Connect", "Echo", "Sleep", "Disconnect"}
 
 	var wg sync.WaitGroup
 	for i := 0; i < n; i++ {
