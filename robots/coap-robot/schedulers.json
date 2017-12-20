@@ -2,31 +2,25 @@
 	{
 		"Name": "Connect",
 		"N": 1,
-		"C": 100,
+		"C": 1000,
 		"QPS": 0
 	},
 	{
 		"Name": "Ping",
 		"N": 100,
-		"C": 100,
+		"C": 5000,
 		"QPS": 0
 	},
 	{
 		"Name": "Echo",
 		"N": 1,
-		"C": 100,
+		"C": 1000,
 		"QPS": 0
 	},
 	{
 		"Name": "Disconnect",
 		"N": 1,
-		"C": 100,
-		"QPS": 0
-	},
-	{
-		"Name": "ShortPing",
-		"N": 100,
-		"C": 100,
+		"C": 1000,
 		"QPS": 0
 	}
 ]

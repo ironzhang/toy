@@ -4,10 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/ironzhang/coap"
 	"github.com/ironzhang/toy/framework/robot"
+	"github.com/ironzhang/x/collect"
 )
 
 var client coap.Client
@@ -15,12 +17,13 @@ var client coap.Client
 func init() {
 	coap.Verbose = 0
 	coap.EnableCache = false
+	go collect.PrintDefaultCollect(os.Stdout, 5*time.Second, true)
 }
 
 func NewRobots(n int, file string) ([]robot.Robot, error) {
 	robots := make([]robot.Robot, 0, n)
 	for i := 1; i <= n; i++ {
-		robots = append(robots, newRobot("localhost:5683"))
+		robots = append(robots, newRobot("172.16.127.243:5683"))
 	}
 	return robots, nil
 }
@@ -64,6 +67,9 @@ func (p *Robot) Do(name string) error {
 }
 
 func (p *Robot) ServeCOAP(w coap.ResponseWriter, r *coap.Request) {
+	collectf := collect.Default.Collect("main.Robot.ServeCOAP")
+	defer collectf()
+
 	//log.Printf("ServeCOAP: %q", r.URL.Path)
 	switch r.URL.Path {
 	case "/echoFinish":
@@ -86,6 +92,9 @@ func (p *Robot) Disconnect() error {
 }
 
 func (p *Robot) Ping() error {
+	collectf := collect.Default.Collect("main.Robot.Ping")
+	defer collectf()
+
 	urlstr := fmt.Sprintf("coap://%s/ping", p.addr)
 	req, err := coap.NewRequest(true, coap.POST, urlstr, nil)
 	if err != nil {

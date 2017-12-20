@@ -3,8 +3,13 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
+	"net/http/pprof"
+	"os"
+	"time"
 
 	"github.com/ironzhang/coap"
+	"github.com/ironzhang/x/collect"
 )
 
 type Server struct {
@@ -17,6 +22,9 @@ func (s *Server) ListenAndServe(address string) error {
 }
 
 func (s *Server) ServeCOAP(w coap.ResponseWriter, r *coap.Request) {
+	collectf := collect.Default.Collect("main.Server.ServeCOAP")
+	defer collectf()
+
 	switch r.URL.Path {
 	case "/echo":
 		go s.echo(r.RemoteAddr.String(), 1)
@@ -51,6 +59,14 @@ func main() {
 	coap.Verbose = 0
 	coap.EnableCache = false
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	go collect.PrintDefaultCollect(os.Stdout, 5*time.Second, true)
+
+	go func() {
+		var _ = pprof.Index
+		if err := http.ListenAndServe(":8000", nil); err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	var s Server
 	if err := s.ListenAndServe(":5683"); err != nil {
