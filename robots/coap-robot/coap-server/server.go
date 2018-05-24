@@ -17,7 +17,7 @@ type Server struct {
 }
 
 func (s *Server) ListenAndServe(address string) error {
-	s.svr.ReadBytes = 512 * 1024
+	s.svr.ReadBytes = 1024 * 1024
 	s.svr.Handler = s
 	return s.svr.ListenAndServe(address)
 }

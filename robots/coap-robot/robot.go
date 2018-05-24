@@ -23,7 +23,7 @@ func init() {
 func NewRobots(n int, file string) ([]robot.Robot, error) {
 	robots := make([]robot.Robot, 0, n)
 	for i := 1; i <= n; i++ {
-		robots = append(robots, newRobot("172.16.127.243:5683"))
+		robots = append(robots, newRobot("10.0.0.38:5683"))
 	}
 	return robots, nil
 }
